@@ -274,12 +274,13 @@
             margin-top: 30px;
             text-align: right;
             padding-right: 20px; /* Add some padding */
+            line-height: 2; /* Increased line height for signature */
         }
 
         .signature-line {
             border-top: 1px solid #333;
             width: 200px;
-            margin: 20px 0 5px auto;
+            margin: 10px 0 5px auto; /* Adjusted margin for spacing */
         }
 
         .receipt-footer {
@@ -470,20 +471,16 @@
 
             <div class="qr-section">
                 <div id="qrcode"></div>
-                <p style="margin-top: 10px; font-size: 13px; color: #666;">สแกนเพื่อตรวจสอบใบเสร็จ</p>
-            </div>
+                </div>
 
             <div class="signature-section">
                 <div>ผู้รับเงิน</div>
-                <div class="signature-line"></div>
-                <div style="font-size: 13px; margin-top: 5px;">(.............................)</div>
-            </div>
+                <div class="signature-line" style="margin-top: 25px;"></div> </div>
 
             <div class="receipt-footer">
                 <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
                 <p>โรงเรียนเลอวองจินตคณิต</p>
-                <p style="margin-top: 10px;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
-            </div>
+                </div>
 
             <button class="btn export-btn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
             <button class="btn back-btn" onclick="backToForm()">กลับหน้าแรก</button>
@@ -839,6 +836,7 @@
             const originalReceiptWidth = receiptElement.style.width;
             const originalReceiptMaxWidth = receiptElement.style.maxWidth;
             const originalReceiptPadding = receiptElement.style.padding;
+            const originalReceiptBoxSizing = receiptElement.style.boxSizing; // Capture box-sizing
             const originalReceiptTransform = receiptElement.style.transform;
 
             // Temporarily adjust body for full content capture
@@ -856,9 +854,11 @@
             receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
             
             // Set fixed width and padding for consistent rendering, matching A4 aspect
-            receiptElement.style.width = '210mm'; // A4 width
-            receiptElement.style.maxWidth = '210mm';
-            receiptElement.style.padding = '20mm'; // Standard A4 margins, adjust if needed
+            // Using pixels based on 96 DPI for A4: 210mm * 3.779528 px/mm = ~794px
+            // 20mm margin = 20 * 3.779528 = ~75.5px
+            receiptElement.style.width = '794px'; // A4 width in pixels at 96 DPI
+            receiptElement.style.maxWidth = '794px';
+            receiptElement.style.padding = '75.5px'; // Standard A4 margins in pixels, adjust if needed
             receiptElement.style.boxSizing = 'border-box'; // Ensure padding is included in width/height
             receiptElement.style.transform = 'none'; // Clear any transforms
 
@@ -876,7 +876,7 @@
                 });
 
                 // For debugging: open the captured image in a new tab
-                const imgDebug = canvas.toDataURL('image/png');
+                // const imgDebug = canvas.toDataURL('image/png');
                 // window.open(imgDebug); // Uncomment this line to debug the captured image
                 // console.log("html2canvas captured image data length:", imgDebug.length);
 
@@ -884,15 +884,14 @@
                 const imgData = canvas.toDataURL('image/png');
                 const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
 
-                const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
-                const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
-                const imgHeight = canvas.height * imgWidth / canvas.width; // Calculate image height to fit PDF width
+                const pdfWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
+                const pdfHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
+                const imgHeightScaled = canvas.height * pdfWidth / canvas.width; // Calculate image height to fit PDF width
 
-                // Only add one page if the content fits. Remove the loop for multiple pages.
-                // If imgHeight is greater than pageHeight, content will be cut off on PDF if you only add one page.
-                // However, based on your request, you want only one page.
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight); 
-                // Removed the while loop and multi-page logic
+                // Add image to PDF. No need for multi-page logic if content fits one page.
+                // If content is too long for one page, it will be cut off.
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeightScaled); 
+                // Removed the while loop and multi-page logic, as requested for single page.
 
                 pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
 
@@ -915,7 +914,7 @@
                 receiptElement.style.width = originalReceiptWidth;
                 receiptElement.style.maxWidth = originalReceiptMaxWidth;
                 receiptElement.style.padding = originalReceiptPadding;
-                receiptElement.style.boxSizing = ''; // Reset box-sizing
+                receiptElement.style.boxSizing = originalReceiptBoxSizing; // Restore box-sizing
                 receiptElement.style.transform = originalReceiptTransform;
             }
         }
