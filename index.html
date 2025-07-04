@@ -640,7 +640,7 @@
             const selectedCourse = coursePricing [courseType];
             if (selectedCourse) {
                 tuitionActualPrice = selectedCourse.tuitionActual;
-                tuitionFullPrice = selectedCourse.type.nominalFullPrice; // Fixed: Use nominalFullPrice from selectedCourse
+                tuitionFullPrice = selectedCourse.nominalFullPrice; // Fixed: Removed .type
                 courseDiscountAmount = selectedCourse.savedAmount || 0;
             }
 
@@ -696,7 +696,7 @@
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
             // *** IMPORTANT: This URL is now hardcoded as requested ***
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbzMtgpPi7vyfVUEaHX4-D9gG9irXaiRdsRygju7BHK0bz5iVH23dabIvM67jEql7lsx/exec';
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
 
             const sheetsData = {
                 timestamp: data.timestamp, // Use the ISO string from paymentData
@@ -906,7 +906,7 @@
                 const canvas = await html2canvas(receiptElement, {
                     scale: 4, // เพิ่ม scale เป็น 4 เพื่อความละเอียดที่สูงขึ้นไปอีก (สำหรับโลโก้)
                     useCORS: true,
-                    logging: false // Disable logging for cleaner console in production, can set to true for debug
+                    logging: false // Disable logging for cleaner console in production, can set to true for true for debug
                 });
 
                 // For debugging: open the captured image in a new tab
