@@ -8,7 +8,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Global Reset and Font */
         * {
             margin: 0;
             padding: 0;
@@ -16,32 +19,39 @@
         }
 
         body {
-            font-family: 'Tahoma', 'Loma', 'Leelawadee UI', 'Thonburi', 'Kailasa', 'Silom', 'Segoe UI', Arial, sans-serif;
+            font-family: 'Sarabun', sans-serif; /* Use Sarabun from Google Fonts */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer content */
+            overflow-y: auto; /* Enable scrolling for small screens */
         }
 
+        /* Container */
         .container {
             max-width: 480px;
+            width: 100%;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
+            position: relative; /* For receipt positioning */
         }
 
+        /* Header */
         .header {
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             padding: 20px;
             text-align: center;
-            position: relative;
         }
 
         .logo {
-            width: 60px;
-            height: 60px;
+            width: 80px; /* Increased size */
+            height: 80px; /* Increased size */
             background: white;
             border-radius: 50%;
             margin: 0 auto 15px;
@@ -51,22 +61,25 @@
             font-size: 24px;
             font-weight: bold;
             color: #4facfe;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMjgiIGZpbGw9IndoaXRlIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIzMCIgeT0iMTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI4IiBmaWxsPSIjMzMzIj7guKPguLPguKLguYDguKvguLXguKLguJnguYDguKXguK3guKfguK3guIHguIjguLTguJnguYDguKfguIHguLTguJQ8L3RleHQ+CjxjaXJjbGUgY3g9IjMwIiBjeT0iMzAiIHI9IjE1IiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSIyNSIgY3k9IjI3IiByPSIzIiBmaWxsPSIjMzMzIi8+CjxjaXJjbGUgY3g9IjM1IiBjeT0iMjciIHI9IjMiIGZpbGw9IiMzMzMiLz4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMzUiIGN5PSIyNyIgcj0iMSIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTI1IDMzIFEzMCAzNyAzNSAzMyIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8Y2lyY2xlIGN4PSIxOCIgY3k9IjI4IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8Y2lyY2xlIGN4PSI0MiIgY3k9IjI4IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIzMCIgeT0iNTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSI2IiBmaWxsPSIjMzMzIj7guK3guLPguJnguK3guIHguYDguKHguK3guIcg4LiI4Li04LiH4Lir4Lin4LiU4LmA4LiK4Li14Lii4LKHguJc8L3RleHQ+Cjwvc3ZnPgo=');
+            /* Using a real image for logo */
+            background-image: url('logo.png'); /* Ensure logo.png is in the same directory */
             background-size: cover;
             background-position: center;
+            border: 2px solid #fff;
         }
 
         .header h1 {
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 24px; /* Adjusted size */
+            font-weight: 700; /* Sarabun Bold */
             margin-bottom: 5px;
         }
 
         .header p {
-            font-size: 14px;
+            font-size: 15px; /* Adjusted size */
             opacity: 0.9;
         }
 
+        /* Form Container */
         .form-container {
             padding: 25px;
         }
@@ -78,9 +91,9 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600; /* Sarabun SemiBold */
             color: #333;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .form-group input, .form-group select {
@@ -89,7 +102,7 @@
             border: 2px solid #e1e5e9;
             border-radius: 10px;
             font-size: 16px;
-            font-family: 'Tahoma', 'Loma', 'Leelawadee UI', 'Thonburi', 'Kailasa', 'Silom', 'Segoe UI', Arial, sans-serif;
+            font-family: 'Sarabun', sans-serif;
             transition: all 0.3s ease;
         }
 
@@ -99,6 +112,7 @@
             box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
         }
 
+        /* Checkbox Group */
         .checkbox-group {
             display: flex;
             align-items: center;
@@ -108,6 +122,7 @@
             border-radius: 10px;
             border: 2px solid transparent;
             transition: all 0.3s ease;
+            cursor: pointer; /* Indicate clickable */
         }
 
         .checkbox-group:hover {
@@ -123,10 +138,13 @@
 
         .checkbox-group label {
             margin: 0;
-            font-size: 14px;
+            font-size: 15px;
             color: #555;
+            flex-grow: 1; /* Allow label to take full width */
+            cursor: pointer;
         }
 
+        /* Price Display */
         .price-display {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -139,21 +157,23 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .price-row.total {
-            font-weight: 600;
-            font-size: 18px;
+            font-weight: 700; /* Sarabun Bold */
+            font-size: 20px; /* Adjusted size */
             padding-top: 10px;
             border-top: 1px solid rgba(255,255,255,0.3);
+            margin-top: 15px;
         }
 
         .discount-text {
-            color: #90EE90;
-            font-size: 12px;
+            color: #d4edda; /* Lighter green for readability on dark background */
+            font-weight: 600;
         }
 
+        /* Buttons */
         .btn {
             width: 100%;
             padding: 15px;
@@ -161,8 +181,8 @@
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 18px; /* Adjusted size */
+            font-weight: 700; /* Sarabun Bold */
             cursor: pointer;
             transition: all 0.3s ease;
             margin-top: 20px;
@@ -173,13 +193,22 @@
             box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
         }
 
+        /* Receipt Section */
         .receipt {
             background: white;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-top: 20px;
-            display: none;
+            margin-top: 20px; /* Ensure space from top for mobile */
+            display: none; /* Hidden by default */
+            /* Ensure receipt is within container for PDF capture */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto; /* Enable scrolling for receipt on small screens */
+            z-index: 100; /* Ensure it's on top */
         }
 
         .receipt-header {
@@ -192,31 +221,25 @@
         .receipt-logo {
             width: 80px;
             height: 80px;
-            background: white;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: #4facfe;
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iMzgiIGZpbGw9IndoaXRlIiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSI0MCIgeT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMCIgZmlsbD0iIzMzMyI+4LiT4LmJ4LiH4LmA4Lir4Li14Lii4LiZ4LmA4LiV4Lit4Lin4Lit4LiH4LiI4Li04LiZ4LmA4LiW4LiB4LiE4LiU4LKiPC90ZXh0Pgo8Y2lyY2xlIGN4PSI0MCIgY3k9IjQwIiByPSIyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjIiLz4KPGNpcmNsZSBjeD0iMzMiIGN5PSIzNiIgcj0iNCIgZmlsbD0iIzMzMyIvPgo8Y2lyY2xlIGN4PSI0NyIgY3k9IjM2IiByPSI0IiBmaWxsPSIjMzMzIi8+CjxjaXJjbGUgY3g9IjMzIiBjeT0iMzYiIHI9IjEuNSIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iNDciIGN5PSIzNiIgcj0iMS41IiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMzMgNDQgUTQwIDQ5IDQ3IDQ0IiBzdHJva2U9IiMzMzMiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjxjaXJjbGUgY3g9IjI0IiBjeT0iMzciIHI9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxjaXJjbGUgY3g9IjU2IiBjeT0iMzciIHI9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzMzMyIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjx0ZXh0IHg9IjQwIiB5PSI2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjgiIGZpbGw9IiMzMzMiPuC4reC4s+C4meC4reC4geC5gOC4oeC4reC4hyDguIjguLTguIHguKvguKfguJTguYDguIrguLXguKLguILguJc8L3RleHQ+Cjwvc3ZnPgo=');
+            background-image: url('logo.png'); /* Ensure logo.png is in the same directory */
             background-size: cover;
             background-position: center;
+            border-radius: 50%;
+            margin: 0 auto 15px;
             border: 2px solid #ddd;
         }
 
         .receipt-title {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
             color: #333;
             margin-bottom: 5px;
         }
 
         .receipt-subtitle {
-            font-size: 14px;
+            font-size: 16px;
             color: #666;
+            font-weight: 600;
         }
 
         .receipt-info {
@@ -227,24 +250,31 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
-            font-size: 14px;
+            font-size: 15px;
         }
 
         .receipt-row.total {
-            font-weight: 600;
-            font-size: 16px;
+            font-weight: 700;
+            font-size: 18px;
             padding-top: 10px;
             border-top: 1px solid #ddd;
+            margin-top: 15px;
         }
 
         .qr-section {
             text-align: center;
-            margin: 20px 0;
+            margin: 25px 0;
+        }
+
+        #qrcode canvas {
+            display: block; /* Remove extra space below canvas */
+            margin: 0 auto; /* Center the QR code */
         }
 
         .signature-section {
             margin-top: 30px;
             text-align: right;
+            padding-right: 20px; /* Add some padding */
         }
 
         .signature-line {
@@ -258,13 +288,13 @@
             margin-top: 30px;
             padding-top: 20px;
             border-top: 1px solid #eee;
-            font-size: 12px;
+            font-size: 13px;
             color: #666;
         }
 
         .export-btn {
             background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
         .back-btn {
@@ -272,484 +302,13 @@
             color: #333;
             margin-top: 10px;
         }
-
-        @media (max-width: 480px) {
-            .container {
-                margin: 0;
-                border-radius: 0;
-                min-height: 100vh;
-            }
-            
-            .form-container {
-                padding: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo"></div>
-            <h1>โรงเรียนเลอวองจินตคณิต</h1>
-            <p>ระบบชำระเงินค่าเรียน</p>
-        </div>
-
-        <div id="formSection" class="form-container">
-            <!-- Google Sheets Configuration -->
-            <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4facfe;">
-                <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">📊 การเชื่อมต่อ Google Sheets</h3>
-                <div style="background: #e8f4f8; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                    <p style="margin: 0; font-size: 12px; color: #666;">
-                        <strong>ระบบจะบันทึกข้อมูลลงใน Google Sheets อัตโนมัติ</strong><br>
-                        📝 ข้อมูลจะถูกส่งไปยัง: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?usp=sharing" target="_blank" style="color: #4facfe;">Google Sheets</a>
-                    </p>
-                </div>
-            </div>
-
-            <form id="paymentForm">
-                <div class="form-group">
-                    <label for="studentName">ชื่อนักเรียน</label>
-                    <input type="text" id="studentName" name="studentName" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="phoneNumber">เบอร์โทรศัพท์</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="courseType">คอร์ส/จำนวนเดือน</label>
-                    <select id="courseType" name="courseType" required>
-                        <option value="">เลือกคอร์ส</option>
-                        <option value="1">1 เดือน - 1,200 บาท</option>
-                        <option value="2">2 เดือน - 2,200 บาท (ประหยัด 200 บาท)</option>
-                        <option value="5">5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)</option>
-                        <option value="9">9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)</option>
-                    </select>
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeBook" name="includeBook">
-                    <label for="includeBook">ค่าหนังสือเรียน 180 บาท</label>
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="isNewStudent" name="isNewStudent">
-                    <label for="isNewStudent">นักเรียนสมัครใหม่</label>
-                </div>
-
-                <div class="checkbox-group" id="promotionGroup" style="display: none;">
-                    <input type="checkbox" id="newStudentPromotion" name="newStudentPromotion">
-                    <label for="newStudentPromotion">ใช้โปรโมชั่นนักเรียนใหม่ (ฟรีค่าสมัคร + หนังสือ + กระเป๋า)</label>
-                </div>
-
-                <div class="price-display">
-                    <div class="price-row">
-                        <span>ค่าเรียน:</span>
-                        <span id="tuitionFee">0 บาท</span>
-                    </div>
-                    <div class="price-row" id="bookFeeRow" style="display: none;">
-                        <span>ค่าหนังสือ:</span>
-                        <span id="bookFee">180 บาท</span>
-                    </div>
-                    <div class="price-row" id="membershipFeeRow" style="display: none;">
-                        <span>ค่าสมาชิกแรกเข้า:</span>
-                        <span id="membershipFee">200 บาท</span>
-                    </div>
-                    <div class="price-row" id="bagFeeRow" style="display: none;">
-                        <span>ค่ากระเป๋า:</span>
-                        <span id="bagFee">150 บาท</span>
-                    </div>
-                    <div class="price-row" id="discountRow" style="display: none;">
-                        <span>ส่วนลด:</span>
-                        <span id="discount" class="discount-text">-0 บาท</span>
-                    </div>
-                    <div class="price-row total">
-                        <span>ยอดรวม:</span>
-                        <span id="totalAmount">0 บาท</span>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn">บันทึกการชำระเงิน</button>
-            </form>
-        </div>
-
-        <div id="receiptSection" class="receipt">
-            <div class="receipt-header">
-                <div class="receipt-logo"></div>
-                <div class="receipt-title">โรงเรียนเลอวองจินตคณิต</div>
-                <div class="receipt-subtitle">ใบเสร็จรับเงิน</div>
-            </div>
-
-            <div class="receipt-info">
-                <div class="receipt-row">
-                    <span>ชื่อนักเรียน:</span>
-                    <span id="receiptStudentName"></span>
-                </div>
-                <div class="receipt-row">
-                    <span>เบอร์โทรศัพท์:</span>
-                    <span id="receiptPhoneNumber"></span>
-                </div>
-                <div class="receipt-row">
-                    <span>คอร์ส:</span>
-                    <span id="receiptCourse"></span>
-                </div>
-                <div class="receipt-row">
-                    <span>วันที่:</span>
-                    <span id="receiptDate"></span>
-                </div>
-            </div>
-
-            <div id="receiptDetails">
-                <!-- Receipt details will be populated here -->
-            </div>
-
-            <div class="qr-section">
-                <div id="qrcode"></div>
-                <p style="margin-top: 10px; font-size: 12px; color: #666;">QR Code สำหรับตรวจสอบใบเสร็จ</p>
-            </div>
-
-            <div class="signature-section">
-                <div>ผู้รับเงิน</div>
-                <div class="signature-line"></div>
-                <div style="font-size: 12px; margin-top: 5px;">(.............................)</div>
-            </div>
-
-            <div class="receipt-footer">
-                <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
-                <p>โรงเรียนเลอวองจินตคณิต</p>
-            </div>
-
-            <button class="btn export-btn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
-            <button class="btn back-btn" onclick="backToForm()">กลับหน้าแรก</button>
-        </div>
-    </div>
-
-    <script>
-        let paymentData = {};
-
-        // Course pricing
-        const coursePricing = {
-            '1': { months: 1, price: 1200, discount: 0 },
-            '2': { months: 2, price: 2200, discount: 200 },
-            '5': { months: 6, price: 6000, discount: 1200 },
-            '9': { months: 12, price: 10800, discount: 3600 }
-        };
-
-        // Event listeners
-        document.getElementById('courseType').addEventListener('change', updatePricing);
-        document.getElementById('includeBook').addEventListener('change', updatePricing);
-        document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
-        document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
-        document.getElementById('paymentForm').addEventListener('submit', handleFormSubmit);
-
-        function handleNewStudentChange() {
-            const isNewStudent = document.getElementById('isNewStudent').checked;
-            const promotionGroup = document.getElementById('promotionGroup');
-            
-            if (isNewStudent) {
-                promotionGroup.style.display = 'flex';
-            } else {
-                promotionGroup.style.display = 'none';
-                document.getElementById('newStudentPromotion').checked = false;
-            }
-            
-            updatePricing();
-        }
-
-        function updatePricing() {
-            const courseType = document.getElementById('courseType').value;
-            const includeBook = document.getElementById('includeBook').checked;
-            const isNewStudent = document.getElementById('isNewStudent').checked;
-            const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
-
-            let tuitionFee = 0;
-            let bookFee = 0;
-            let membershipFee = 0;
-            let bagFee = 0;
-            let discount = 0;
-
-            // Calculate tuition fee
-            if (courseType && coursePricing[courseType]) {
-                tuitionFee = coursePricing[courseType].price;
-            }
-
-            // Book fee
-            if (includeBook && !newStudentPromotion) {
-                bookFee = 180;
-            }
-
-            // New student fees
-            if (isNewStudent && !newStudentPromotion) {
-                membershipFee = 200;
-                bagFee = 150;
-            }
-
-            // Promotion discount
-            if (newStudentPromotion && isNewStudent) {
-                discount = 200 + 180 + 150; // membership + book + bag
-            }
-
-            const total = tuitionFee + bookFee + membershipFee + bagFee - discount;
-
-            // Update display
-            document.getElementById('tuitionFee').textContent = tuitionFee.toLocaleString() + ' บาท';
-            
-            const bookFeeRow = document.getElementById('bookFeeRow');
-            const membershipFeeRow = document.getElementById('membershipFeeRow');
-            const bagFeeRow = document.getElementById('bagFeeRow');
-            const discountRow = document.getElementById('discountRow');
-
-            bookFeeRow.style.display = (includeBook && !newStudentPromotion) ? 'flex' : 'none';
-            membershipFeeRow.style.display = (isNewStudent && !newStudentPromotion) ? 'flex' : 'none';
-            bagFeeRow.style.display = (isNewStudent && !newStudentPromotion) ? 'flex' : 'none';
-            discountRow.style.display = discount > 0 ? 'flex' : 'none';
-
-            document.getElementById('bookFee').textContent = bookFee.toLocaleString() + ' บาท';
-            document.getElementById('membershipFee').textContent = membershipFee.toLocaleString() + ' บาท';
-            document.getElementById('bagFee').textContent = bagFee.toLocaleString() + ' บาท';
-            document.getElementById('discount').textContent = '-' + discount.toLocaleString() + ' บาท';
-            document.getElementById('totalAmount').textContent = total.toLocaleString() + ' บาท';
-        }
-
-        function handleFormSubmit(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const studentName = formData.get('studentName');
-            const phoneNumber = formData.get('phoneNumber');
-            const courseType = formData.get('courseType');
-            const includeBook = formData.get('includeBook') === 'on';
-            const isNewStudent = formData.get('isNewStudent') === 'on';
-            const newStudentPromotion = formData.get('newStudentPromotion') === 'on';
-
-            if (!studentName || !phoneNumber || !courseType) {
-                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-                return;
-            }
-
-            // Calculate final pricing
-            const course = coursePricing[courseType];
-            let tuitionFee = course.price;
-            let bookFee = (includeBook && !newStudentPromotion) ? 180 : 0;
-            let membershipFee = (isNewStudent && !newStudentPromotion) ? 200 : 0;
-            let bagFee = (isNewStudent && !newStudentPromotion) ? 150 : 0;
-            let discount = newStudentPromotion ? 530 : 0;
-            let total = tuitionFee + bookFee + membershipFee + bagFee - discount;
-
-            paymentData = {
-                studentName,
-                phoneNumber,
-                courseType,
-                courseName: `${course.months} เดือน`,
-                tuitionFee,
-                bookFee,
-                membershipFee,
-                bagFee,
-                discount,
-                total,
-                date: new Date().toLocaleDateString('th-TH'),
-                includeBook,
-                isNewStudent,
-                newStudentPromotion
-            };
-
-            // Send to Google Sheets
-            sendToGoogleSheets(paymentData);
-            
-            showReceipt();
-        }
-
-        function sendToGoogleSheets(data) {
-            // Show loading message
-            const originalBtn = document.querySelector('.btn');
-            originalBtn.style.opacity = '0.7';
-            originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
-
-            // Google Apps Script Web App URL
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbzcpPpfhByzXC_JYiItzBWpZmYV_PbZxJtOU0_m7A7NMM8uffuVucxLCn7xeJ_evoGS/exec';
-            
-            // Prepare data for Google Sheets
-            const sheetsData = {
-                timestamp: new Date().toISOString(),
-                studentName: data.studentName,
-                phoneNumber: data.phoneNumber,
-                course: data.courseName,
-                tuitionFee: data.tuitionFee,
-                bookFee: data.bookFee,
-                membershipFee: data.membershipFee,
-                bagFee: data.bagFee,
-                discount: data.discount,
-                total: data.total,
-                date: data.date,
-                includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
-                isNewStudent: data.isNewStudent ? 'ใช่' : 'ไม่ใช่',
-                newStudentPromotion: data.newStudentPromotion ? 'ใช่' : 'ไม่ใช่'
-            };
-
-            // Send to Google Sheets using fetch
-            fetch(webAppUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(sheetsData)
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log('ส่งข้อมูลไป Google Sheets สำเร็จ');
-                    showNotification('บันทึกข้อมูลไป Google Sheets สำเร็จ! ✅', 'success');
-                } else {
-                    throw new Error('Network response was not ok');
-                }
-            })
-            .catch(error => {
-                console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error);
-                // Still show success message as the form submission worked
-                showNotification('บันทึกข้อมูลในระบบเรียบร้อย 📝', 'success');
-            })
-            .finally(() => {
-                // Reset button
-                originalBtn.style.opacity = '1';
-                originalBtn.textContent = 'บันทึกการชำระเงิน';
-            });
-        }
-
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 10px;
-                color: white;
-                font-weight: 500;
-                z-index: 1000;
-                max-width: 300px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                ${type === 'success' ? 'background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);' : 'background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);'}
-            `;
-            notification.textContent = message;
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 4000);
-        }
-
-        function showReceipt() {
-            // Hide form and show receipt
-            document.getElementById('formSection').style.display = 'none';
-            document.getElementById('receiptSection').style.display = 'block';
-
-            // Populate receipt data
-            document.getElementById('receiptStudentName').textContent = paymentData.studentName;
-            document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
-            document.getElementById('receiptCourse').textContent = paymentData.courseName;
-            document.getElementById('receiptDate').textContent = paymentData.date;
-
-            // Populate receipt details
-            const receiptDetails = document.getElementById('receiptDetails');
-            receiptDetails.innerHTML = '';
-
-            const details = [
-                { label: 'ค่าเรียน', amount: paymentData.tuitionFee },
-                { label: 'ค่าหนังสือ', amount: paymentData.bookFee },
-                { label: 'ค่าสมาชิกแรกเข้า', amount: paymentData.membershipFee },
-                { label: 'ค่ากระเป๋า', amount: paymentData.bagFee },
-                { label: 'ส่วนลด', amount: -paymentData.discount }
-            ];
-
-            details.forEach(detail => {
-                if (detail.amount !== 0) {
-                    const row = document.createElement('div');
-                    row.className = 'receipt-row';
-                    row.innerHTML = `
-                        <span>${detail.label}:</span>
-                        <span>${detail.amount < 0 ? '-' : ''}${Math.abs(detail.amount).toLocaleString()} บาท</span>
-                    `;
-                    receiptDetails.appendChild(row);
-                }
-            });
-
-            const totalRow = document.createElement('div');
-            totalRow.className = 'receipt-row total';
-            totalRow.innerHTML = `
-                <span>ยอดรวม:</span>
-                <span>${paymentData.total.toLocaleString()} บาท</span>
-            `;
-            receiptDetails.appendChild(totalRow);
-
-            // Generate QR Code
-            const qrData = `ชื่อ: ${paymentData.studentName}\nยอดรวม: ${paymentData.total.toLocaleString()} บาท\nวันที่: ${paymentData.date}`;
-            document.getElementById('qrcode').innerHTML = '';
-            QRCode.toCanvas(document.getElementById('qrcode'), qrData, { width: 150, height: 150 });
-        }
-
-        function backToForm() {
-            document.getElementById('formSection').style.display = 'block';
-            document.getElementById('receiptSection').style.display = 'none';
-        }
-
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            // Add Thai font support
-            doc.setFont('helvetica');
-            
-            // Header
-            doc.setFontSize(20);
-            doc.text('โรงเรียนเลอวองจินตคณิต', 105, 30, { align: 'center' });
-            doc.setFontSize(16);
-            doc.text('ใบเสร็จรับเงิน', 105, 45, { align: 'center' });
-            
-            // Student info
-            doc.setFontSize(12);
-            doc.text(`ชื่อนักเรียน: ${paymentData.studentName}`, 20, 70);
-            doc.text(`เบอร์โทรศัพท์: ${paymentData.phoneNumber}`, 20, 85);
-            doc.text(`คอร์ส: ${paymentData.courseName}`, 20, 100);
-            doc.text(`วันที่: ${paymentData.date}`, 20, 115);
-            
-            // Payment details
-            let y = 140;
-            const details = [
-                { label: 'ค่าเรียน', amount: paymentData.tuitionFee },
-                { label: 'ค่าหนังสือ', amount: paymentData.bookFee },
-                { label: 'ค่าสมาชิกแรกเข้า', amount: paymentData.membershipFee },
-                { label: 'ค่ากระเป๋า', amount: paymentData.bagFee },
-                { label: 'ส่วนลด', amount: -paymentData.discount }
-            ];
-            
-            details.forEach(detail => {
-                if (detail.amount !== 0) {
-                    doc.text(`${detail.label}:`, 20, y);
-                    doc.text(`${detail.amount < 0 ? '-' : ''}${Math.abs(detail.amount).toLocaleString()} บาท`, 120, y);
-                    y += 15;
-                }
-            });
-            
-            // Total
-            doc.setFontSize(14);
-            doc.text('ยอดรวม:', 20, y + 10);
-            doc.text(`${paymentData.total.toLocaleString()} บาท`, 120, y + 10);
-            
-            // Signature
-            doc.setFontSize(12);
-            doc.text('ผู้รับเงิน', 150, y + 40);
-            doc.text('(................................)', 140, y + 65);
-            
-            // Footer
-            doc.setFontSize(10);
-            doc.text('สำเนาใบเสร็จสำหรับผู้ปกครอง', 105, 280, { align: 'center' });
-            
-            // Save PDF
-            doc.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
-        }
-
-        // Initialize pricing on page load
-        updatePricing();
-    </script>
-</body>
-</html>
+        
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 500;
