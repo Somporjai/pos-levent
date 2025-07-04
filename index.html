@@ -202,13 +202,13 @@
             margin-top: 20px; /* Ensure space from top for mobile */
             display: none; /* Hidden by default */
             /* Ensure receipt is within container for PDF capture */
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            /* Removed position absolute here, will manage with JS for PDF export */
+            width: 100%; /* Ensure it takes full width of container */
+            max-width: 480px; /* Match container max-width */
+            box-sizing: border-box; /* Include padding in width */
             overflow-y: auto; /* Enable scrolling for receipt on small screens */
             z-index: 100; /* Ensure it's on top */
+            /* For PDF generation, it will be temporarily made visible and positioned */
         }
 
         .receipt-header {
@@ -509,8 +509,8 @@
         const coursePricing = {
             '1': { months: 1, tuitionActual: 1200, display: '1 เดือน - 1,200 บาท', nominalFullPrice: 1200, savedAmount: 0 },
             '2': { months: 2, tuitionActual: 2200, display: '2 เดือน - 2,200 บาท (ประหยัด 200 บาท)', nominalFullPrice: 2400, savedAmount: 200 },
-            '5': { months: 6, tuitionActual: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 }, // 5 * 1200 = 6000, but gets 6 months so 6 * 1200 = 7200
-            '9': { months: 12, tuitionActual: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 } // 9 * 1200 = 10800, but gets 12 months so 12 * 1200 = 14400
+            '5': { months: 6, tuitionActual: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 },
+            '9': { months: 12, tuitionActual: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 }
         };
 
         // Constants for additional fees
@@ -776,8 +776,8 @@
             const receiptDetailsDiv = document.getElementById('receiptDetails');
             receiptDetailsDiv.innerHTML = '';
 
-            const addReceiptRow = (label, amount, isDiscount = false) => {
-                if (amount !== 0) { // Only add row if amount is not zero
+            const addReceiptRow = (label, amount, isDiscount = false, isFullPrice = false) => {
+                if (amount !== 0 || isFullPrice) { // Always show full price tuition, even if 0 for some reason
                     const row = document.createElement('div');
                     row.className = 'receipt-row';
                     row.innerHTML = `
@@ -788,7 +788,8 @@
                 }
             };
 
-            addReceiptRow('ค่าเรียน', paymentData.tuitionFull); // Display full tuition price
+            // Display full tuition price
+            addReceiptRow('ค่าเรียน', paymentData.tuitionFull, false, true); 
             addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
             addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
             addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
@@ -836,23 +837,40 @@
 
             // Make sure the receipt section is visible before capturing
             receiptElement.style.display = 'block';
-            // Temporarily position off-screen to avoid visual flicker during capture
-            receiptElement.style.position = 'absolute'; 
-            receiptElement.style.left = '-9999px'; 
-            receiptElement.style.top = '-9999px';
-            receiptElement.style.zIndex = '999'; 
+            // Position it off-screen but still in the DOM flow to be captured correctly
+            receiptElement.style.position = 'fixed'; // Use fixed to ensure it's not affected by scroll
+            receiptElement.style.top = '0';
+            receiptElement.style.left = '-9999px'; // Move off-screen
+            receiptElement.style.opacity = '0'; // Make it invisible
+            receiptElement.style.pointerEvents = 'none'; // Disable interactions
+            receiptElement.style.zIndex = '-1'; // Send to background
+
+            // Crucially, ensure it has the correct layout width for capture
+            // Set its width explicitly before capture to ensure A4 proportions
+            const originalWidth = receiptElement.style.width;
+            const originalMaxWidth = receiptElement.style.maxWidth;
+            const originalPadding = receiptElement.style.padding;
+
+            // Set to a reasonable fixed width that html2canvas can capture well
+            // A common "print" width for web content is around 794px for A4 portrait at 96 DPI
+            // For a 'mm' scale in jsPDF, 210mm * 3.779528 = approx 794px
+            // Let's set a fixed pixel width that aligns with our container's max-width if possible
+            receiptElement.style.width = '480px'; // Set to match the container's max-width or your desired print width
+            receiptElement.style.maxWidth = '480px';
+            receiptElement.style.padding = '30px'; // Restore original padding or set explicitly for PDF capture clarity
+
 
             const canvas = await html2canvas(receiptElement, {
-                scale: 2, 
+                scale: 2, // Higher scale for better quality
                 useCORS: true,
                 logging: false // Disable logging for cleaner console
             });
 
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4'); 
+            const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
 
-            const imgWidth = 210; 
-            const pageHeight = 297; 
+            const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm
+            const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm
             const imgHeight = canvas.height * imgWidth / canvas.width;
             let heightLeft = imgHeight;
 
@@ -868,12 +886,18 @@
                 heightLeft -= pageHeight;
             }
             
-            // Restore receipt section styling after capture
+            // Restore original styles after capture
             receiptElement.style.display = 'none';
             receiptElement.style.position = 'static'; // Reset to default flow
-            receiptElement.style.left = '';
             receiptElement.style.top = '';
+            receiptElement.style.left = '';
+            receiptElement.style.opacity = '';
+            receiptElement.style.pointerEvents = '';
             receiptElement.style.zIndex = '';
+            receiptElement.style.width = originalWidth; // Restore original CSS width
+            receiptElement.style.maxWidth = originalMaxWidth; // Restore original CSS max-width
+            receiptElement.style.padding = originalPadding; // Restore original CSS padding
+
 
             pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
         }
