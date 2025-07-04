@@ -367,18 +367,6 @@
         </div>
 
         <div id="formSection" class="form-container">
-            <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4facfe;">
-                <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">📊 การเชื่อมต่อ Google Sheets</h3>
-                <div style="background: #e8f4f8; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                    <p style="margin: 0; font-size: 12px; color: #666;">
-                        <strong>ระบบจะบันทึกข้อมูลลงใน Google Sheets อัตโนมัติ</strong><br>
-                        📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?usp=sharing" target="_blank" style="color: #4facfe;">Google Sheets (ตัวอย่าง)</a>
-                        <br>
-                        <em>URL สำหรับ Google Sheets ได้ถูกระบุในโค้ดแล้ว</em>
-                    </p>
-                </div>
-            </div>
-
             <form id="paymentForm">
                 <div class="form-group">
                     <label for="studentName">ชื่อนักเรียน</label>
@@ -494,6 +482,7 @@
             <div class="receipt-footer">
                 <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
                 <p>โรงเรียนเลอวองจินตคณิต</p>
+                <p style="margin-top: 10px;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
             </div>
 
             <button class="btn export-btn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
@@ -701,7 +690,7 @@
         function sendToGoogleSheets(data) {
             const originalBtn = document.querySelector('.btn');
             originalBtn.style.opacity = '0.7';
-            originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
+            originalBtn.textContent = 'กำลังบันทับข้อมูล...';
 
             // *** IMPORTANT: This URL is now hardcoded as requested ***
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA7GW/exec';
@@ -834,84 +823,104 @@
             const { jsPDF } = window.jspdf;
             const receiptElement = document.getElementById('receiptSection');
 
-            // Store original styles to restore later
-            const originalDisplay = receiptElement.style.display;
-            const originalPosition = receiptElement.style.position;
-            const originalTop = receiptElement.style.top;
-            const originalLeft = receiptElement.style.left;
-            const originalOpacity = receiptElement.style.opacity;
-            const originalVisibility = receiptElement.style.visibility; // Added visibility
-            const originalPointerEvents = receiptElement.style.pointerEvents;
-            const originalZIndex = receiptElement.style.zIndex;
-            const originalWidth = receiptElement.style.width;
-            const originalMaxWidth = receiptElement.style.maxWidth;
-            const originalPadding = receiptElement.style.padding;
+            // Store original body styles
+            const originalBodyOverflow = document.body.style.overflow;
+            const originalBodyMargin = document.body.style.margin;
 
-            // Make it visible (display: block) and structured, but invisible to the user
+            // Store original receipt styles
+            const originalReceiptDisplay = receiptElement.style.display;
+            const originalReceiptPosition = receiptElement.style.position;
+            const originalReceiptTop = receiptElement.style.top;
+            const originalReceiptLeft = receiptElement.style.left;
+            const originalReceiptOpacity = receiptElement.style.opacity;
+            const originalReceiptVisibility = receiptElement.style.visibility;
+            const originalReceiptPointerEvents = receiptElement.style.pointerEvents;
+            const originalReceiptZIndex = receiptElement.style.zIndex;
+            const originalReceiptWidth = receiptElement.style.width;
+            const originalReceiptMaxWidth = receiptElement.style.maxWidth;
+            const originalReceiptPadding = receiptElement.style.padding;
+            const originalReceiptTransform = receiptElement.style.transform; // Capture transform if any
+
+            // Temporarily adjust body for full content capture
+            document.body.style.overflow = 'hidden'; // Prevent scrollbars during capture
+            document.body.style.margin = '0'; // Remove any margin that might affect capture position
+
+            // Make the receipt element display and visible, but off-screen for capture
             receiptElement.style.display = 'block';
             receiptElement.style.position = 'absolute'; // Use absolute to take it out of flow but render fully
-            receiptElement.style.top = '-9999px'; // Move off-screen
+            receiptElement.style.top = '0'; // Position at top left of document
             receiptElement.style.left = '-9999px'; // Move off-screen
-            receiptElement.style.opacity = '0'; // Make it invisible
-            receiptElement.style.visibility = 'hidden'; // Ensure it's hidden from view
+            receiptElement.style.opacity = '1'; // Must be opaque to capture content
+            receiptElement.style.visibility = 'visible'; // Must be visible
             receiptElement.style.pointerEvents = 'none'; // Disable interactions
-            receiptElement.style.zIndex = '-1'; // Send to background
-
-            // Set a fixed width that matches the ideal A4 conversion or container's max-width
-            // This ensures html2canvas renders it consistently
-            receiptElement.style.width = '480px'; // Matching max-width of .container
+            receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
+            receiptElement.style.width = '480px'; // Fixed width for consistent rendering
             receiptElement.style.maxWidth = '480px';
-            receiptElement.style.padding = '30px'; // Maintain a standard padding for PDF capture
+            receiptElement.style.padding = '30px'; // Consistent padding for PDF layout
+            receiptElement.style.transform = 'none'; // Clear any transforms
 
             // Add a small delay to ensure rendering is complete before capture
-            // This is a common workaround for html2canvas issues
-            await new Promise(resolve => setTimeout(resolve, 50)); // Wait 50ms
+            await new Promise(resolve => setTimeout(resolve, 100)); // Increased delay for more stability
 
-            const canvas = await html2canvas(receiptElement, {
-                scale: 2, // Higher scale for better quality
-                useCORS: true,
-                logging: false // Disable logging for cleaner console
-            });
+            try {
+                const canvas = await html2canvas(receiptElement, {
+                    scale: 3, // Increased scale for even better quality (higher resolution PDF)
+                    useCORS: true,
+                    logging: true, // Enable logging for debugging html2canvas issues
+                    windowWidth: receiptElement.scrollWidth, // Capture full scrollable width
+                    windowHeight: receiptElement.scrollHeight // Capture full scrollable height
+                });
 
-            // For debugging: open the captured image in a new tab
-            // const imgDebug = canvas.toDataURL('image/png');
-            // window.open(imgDebug);
+                // For debugging: open the captured image in a new tab
+                // const imgDebug = canvas.toDataURL('image/png');
+                // window.open(imgDebug);
+                // console.log("html2canvas captured image data length:", imgDebug.length);
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
 
-            const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
-            const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
-            const imgHeight = canvas.height * imgWidth / canvas.width; // Calculate image height to fit PDF width
-            let heightLeft = imgHeight;
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
 
-            let position = 0; // Starting Y position for the image
+                const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
+                const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
+                const imgHeight = canvas.height * imgWidth / canvas.width; // Calculate image height to fit PDF width
+                let heightLeft = imgHeight;
 
-            // Add image and handle multiple pages if needed
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+                let position = 0; // Starting Y position for the image
 
-            while (heightLeft > 0) { // Loop while there's still content left to add
-                position = -pageHeight + (imgHeight - heightLeft); // Calculate position for the next page
-                pdf.addPage();
+                // Add image and handle multiple pages if needed
                 pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
+
+                while (heightLeft > 0) { // Loop while there's still content left to add
+                    position = -pageHeight + (imgHeight - heightLeft); // Calculate position for the next page
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
+
+            } catch (error) {
+                console.error("Error during PDF generation:", error);
+                alert("เกิดข้อผิดพลาดในการสร้าง PDF: " + error.message);
+            } finally {
+                // Always restore original styles
+                document.body.style.overflow = originalBodyOverflow;
+                document.body.style.margin = originalBodyMargin;
+
+                receiptElement.style.display = originalReceiptDisplay;
+                receiptElement.style.position = originalReceiptPosition;
+                receiptElement.style.top = originalReceiptTop;
+                receiptElement.style.left = originalReceiptLeft;
+                receiptElement.style.opacity = originalReceiptOpacity;
+                receiptElement.style.visibility = originalReceiptVisibility;
+                receiptElement.style.pointerEvents = originalReceiptPointerEvents;
+                receiptElement.style.zIndex = originalReceiptZIndex;
+                receiptElement.style.width = originalReceiptWidth;
+                receiptElement.style.maxWidth = originalReceiptMaxWidth;
+                receiptElement.style.padding = originalReceiptPadding;
+                receiptElement.style.transform = originalReceiptTransform; // Restore original transform
             }
-
-            // Restore original styles after PDF generation
-            receiptElement.style.display = originalDisplay;
-            receiptElement.style.position = originalPosition;
-            receiptElement.style.top = originalTop;
-            receiptElement.style.left = originalLeft;
-            receiptElement.style.opacity = originalOpacity;
-            receiptElement.style.visibility = originalVisibility; // Restore visibility
-            receiptElement.style.pointerEvents = originalPointerEvents;
-            receiptElement.style.zIndex = originalZIndex;
-            receiptElement.style.width = originalWidth;
-            receiptElement.style.maxWidth = originalMaxWidth;
-            receiptElement.style.padding = originalPadding;
-
-            pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
         }
     </script>
 </body>
