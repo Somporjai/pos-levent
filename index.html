@@ -690,10 +690,10 @@
         function sendToGoogleSheets(data) {
             const originalBtn = document.querySelector('.btn');
             originalBtn.style.opacity = '0.7';
-            originalBtn.textContent = 'กำลังบันทับข้อมูล...';
+            originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
             // *** IMPORTANT: This URL is now hardcoded as requested ***
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA7GW/exec';
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
 
             const sheetsData = {
                 timestamp: data.timestamp, // Use the ISO string from paymentData
@@ -839,7 +839,7 @@
             const originalReceiptWidth = receiptElement.style.width;
             const originalReceiptMaxWidth = receiptElement.style.maxWidth;
             const originalReceiptPadding = receiptElement.style.padding;
-            const originalReceiptTransform = receiptElement.style.transform; // Capture transform if any
+            const originalReceiptTransform = receiptElement.style.transform;
 
             // Temporarily adjust body for full content capture
             document.body.style.overflow = 'hidden'; // Prevent scrollbars during capture
@@ -847,17 +847,21 @@
 
             // Make the receipt element display and visible, but off-screen for capture
             receiptElement.style.display = 'block';
-            receiptElement.style.position = 'absolute'; // Use absolute to take it out of flow but render fully
+            receiptElement.style.position = 'absolute';
             receiptElement.style.top = '0'; // Position at top left of document
             receiptElement.style.left = '-9999px'; // Move off-screen
             receiptElement.style.opacity = '1'; // Must be opaque to capture content
             receiptElement.style.visibility = 'visible'; // Must be visible
             receiptElement.style.pointerEvents = 'none'; // Disable interactions
             receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
-            receiptElement.style.width = '480px'; // Fixed width for consistent rendering
-            receiptElement.style.maxWidth = '480px';
-            receiptElement.style.padding = '30px'; // Consistent padding for PDF layout
+            
+            // Set fixed width and padding for consistent rendering, matching A4 aspect
+            receiptElement.style.width = '210mm'; // A4 width
+            receiptElement.style.maxWidth = '210mm';
+            receiptElement.style.padding = '20mm'; // Standard A4 margins, adjust if needed
+            receiptElement.style.boxSizing = 'border-box'; // Ensure padding is included in width/height
             receiptElement.style.transform = 'none'; // Clear any transforms
+
 
             // Add a small delay to ensure rendering is complete before capture
             await new Promise(resolve => setTimeout(resolve, 100)); // Increased delay for more stability
@@ -867,13 +871,13 @@
                     scale: 3, // Increased scale for even better quality (higher resolution PDF)
                     useCORS: true,
                     logging: true, // Enable logging for debugging html2canvas issues
-                    windowWidth: receiptElement.scrollWidth, // Capture full scrollable width
-                    windowHeight: receiptElement.scrollHeight // Capture full scrollable height
+                    // windowWidth: receiptElement.offsetWidth, // Capture actual rendered width
+                    // windowHeight: receiptElement.offsetHeight // Capture actual rendered height
                 });
 
                 // For debugging: open the captured image in a new tab
-                // const imgDebug = canvas.toDataURL('image/png');
-                // window.open(imgDebug);
+                const imgDebug = canvas.toDataURL('image/png');
+                // window.open(imgDebug); // Uncomment this line to debug the captured image
                 // console.log("html2canvas captured image data length:", imgDebug.length);
 
 
@@ -883,20 +887,12 @@
                 const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
                 const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
                 const imgHeight = canvas.height * imgWidth / canvas.width; // Calculate image height to fit PDF width
-                let heightLeft = imgHeight;
 
-                let position = 0; // Starting Y position for the image
-
-                // Add image and handle multiple pages if needed
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-
-                while (heightLeft > 0) { // Loop while there's still content left to add
-                    position = -pageHeight + (imgHeight - heightLeft); // Calculate position for the next page
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
+                // Only add one page if the content fits. Remove the loop for multiple pages.
+                // If imgHeight is greater than pageHeight, content will be cut off on PDF if you only add one page.
+                // However, based on your request, you want only one page.
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight); 
+                // Removed the while loop and multi-page logic
 
                 pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
 
@@ -919,7 +915,8 @@
                 receiptElement.style.width = originalReceiptWidth;
                 receiptElement.style.maxWidth = originalReceiptMaxWidth;
                 receiptElement.style.padding = originalReceiptPadding;
-                receiptElement.style.transform = originalReceiptTransform; // Restore original transform
+                receiptElement.style.boxSizing = ''; // Reset box-sizing
+                receiptElement.style.transform = originalReceiptTransform;
             }
         }
     </script>
