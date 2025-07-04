@@ -3,1036 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบ POS - เลอวองจินตคณิต</title>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>ระบบออกใบเสร็จโรงเรียนเลอวองจินตคณิต</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <style>
-        /* Global Reset and Font */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Sarabun', sans-serif; /* Use Sarabun from Google Fonts */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top for longer content */
-            overflow-y: auto; /* Enable scrolling for small screens */
-        }
-
-        /* Container */
-        .container {
-            max-width: 480px;
-            width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            position: relative; /* For receipt positioning */
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
             padding: 20px;
-            text-align: center;
-        }
-
-        .logo {
-            width: 80px; /* Increased size */
-            height: 80px; /* Increased size */
-            background: white;
-            border-radius: 50%;
-            margin: 0 auto 15px;
+            background-color: #f0f2f5;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 24px;
+            align-items: flex-start;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container, .receipt {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 650px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2em;
             font-weight: bold;
-            color: #4facfe;
-            /* Using a real image for logo */
-            background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
-            background-size: contain; /* Change to contain to fit logo better */
-            background-repeat: no-repeat;
-            background-position: center;
-            border: 2px solid #fff;
         }
 
-        .header h1 {
-            font-size: 24px; /* Adjusted size */
-            font-weight: 700; /* Sarabun Bold */
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            font-size: 15px; /* Adjusted size */
-            opacity: 0.9;
-        }
-
-        /* Form Container */
-        .form-container {
-            padding: 25px;
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600; /* Sarabun SemiBold */
-            color: #333;
-            font-size: 15px;
+            font-weight: bold;
+            color: #555;
         }
 
-        .form-group input, .form-group select {
+        input[type="text"],
+        input[type="tel"],
+        input[type="number"],
+        select {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: 'Sarabun', sans-serif;
-            transition: all 0.3s ease;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
         }
 
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
         }
 
-        /* Checkbox Group */
         .checkbox-group {
             display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .checkbox-group div label, .form-group label[for*="isNewStudent"], .form-group label[for*="newStudentPromotion"] {
+            display: flex;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            cursor: pointer; /* Indicate clickable */
+            font-weight: normal;
+            margin-bottom: 0;
         }
 
-        .checkbox-group:hover {
-            border-color: #4facfe;
+        .promotion-text {
+            color: #e74c3c;
+            font-weight: bold;
         }
 
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            accent-color: #4facfe;
-        }
-
-        .checkbox-group label {
-            margin: 0;
-            font-size: 15px;
-            color: #555;
-            flex-grow: 1; /* Allow label to take full width */
-            cursor: pointer;
-        }
-
-        /* Price Display */
-        .price-display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
-
-        .price-row {
+        .summary-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 15px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0e0e0;
+            font-size: 1.1em;
         }
 
-        .price-row.total {
-            font-weight: 700; /* Sarabun Bold */
-            font-size: 20px; /* Adjusted size */
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.3);
+        .summary-row:last-of-type {
+            border-bottom: none;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
             margin-top: 15px;
+            border-top: 2px solid #2c3e50;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
         }
 
-        .discount-text {
-            color: #d4edda; /* Lighter green for readability on dark background */
-            font-weight: 600;
+        .discount-row span:last-child {
+            color: #e74c3c;
+            font-weight: bold;
         }
 
-        /* Buttons */
         .btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            background-color: #3498db;
             color: white;
+            padding: 12px 25px;
             border: none;
-            border-radius: 12px;
-            font-size: 18px; /* Adjusted size */
-            font-weight: 700; /* Sarabun Bold */
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
+            width: 100%;
+            font-size: 1.1em;
+            margin-top: 25px;
+            transition: background-color 0.3s ease;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
+            background-color: #2980b9;
         }
 
-        /* Receipt Section */
+        .export-btn {
+            background-color: #2ecc71;
+            margin-bottom: 10px;
+        }
+        .export-btn:hover {
+            background-color: #27ae60;
+        }
+
+        .back-btn {
+            background-color: #f39c12;
+        }
+        .back-btn:hover {
+            background-color: #e67e22;
+        }
+
+        /* Receipt Styles */
         .receipt {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-top: 20px; /* Ensure space from top for mobile */
-            display: none; /* Hidden by default */
-            width: 100%; /* Ensure it takes full width of container */
-            max-width: 480px; /* Match container max-width */
-            box-sizing: border-box; /* Include padding in width */
-            overflow-y: auto; /* Enable scrolling for receipt on small screens */
-            z-index: 100; /* Ensure it's on top */
+            padding: 35px;
         }
-
         .receipt-header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             border-bottom: 2px solid #eee;
             padding-bottom: 20px;
         }
-
         .receipt-logo {
             width: 80px;
             height: 80px;
-            background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Google_logo_%282015%29.svg/1200px-Google_logo_%282015%29.svg.png'); /* Replace with your logo URL */
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            border: 2px solid #ddd;
+            margin: 0 auto 10px;
         }
-
         .receipt-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #333;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #2c3e50;
             margin-bottom: 5px;
         }
-
         .receipt-subtitle {
-            font-size: 16px;
-            color: #666;
-            font-weight: 600;
+            font-size: 1.5em;
+            color: #34495e;
+            font-weight: normal;
         }
-
         .receipt-info {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
         }
-
         .receipt-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
-            font-size: 15px;
+            font-size: 1.1em;
         }
-
-        .receipt-row.total {
-            font-weight: 700;
-            font-size: 18px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            margin-top: 15px;
+        .receipt-row span:first-child {
+            font-weight: bold;
+            color: #555;
         }
-
+        .receipt-details-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+        }
+        .receipt-details-section .receipt-row {
+            font-size: 1em; /* Smaller font for line items */
+            color: #444;
+        }
+        .receipt-separator {
+            border-top: 1px dashed #ccc;
+            margin: 15px 0;
+        }
+        .total-row {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
         .qr-section {
             text-align: center;
-            margin: 25px 0;
-            /* Removed QR code display related styles as QR code is removed */
+            margin-top: 25px;
+            margin-bottom: 25px;
         }
-
-        /* #qrcode canvas removed as QR code is removed */
-
+        .qr-section canvas {
+            border: 1px solid #ddd;
+            padding: 5px;
+            background-color: white;
+        }
         .signature-section {
-            margin-top: 30px;
-            text-align: right;
-            padding-right: 20px; /* Add some padding */
-            line-height: 2; /* Increased line height for signature */
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
         }
-
+        .signature-section div {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 5px;
+        }
         .signature-line {
-            border-top: 1px solid #333;
             width: 200px;
-            margin: 10px 0 5px auto; /* Adjusted margin for spacing */
+            height: 1px;
+            background-color: #333;
+            margin: 0 auto;
         }
-
         .receipt-footer {
             text-align: center;
             margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            font-size: 13px;
-            color: #666;
+            font-size: 0.9em;
+            color: #777;
         }
-
-        .export-btn {
-            background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
-            margin-top: 20px;
+        .receipt-footer a {
+            color: #3498db;
+            text-decoration: none;
         }
-
-        .back-btn {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
-            margin-top: 10px;
-        }
-        
-        /* New CSS class to hide elements when generating PDF */
-        .hide-on-pdf {
-            display: none !important;
-        }
-
-        /* Notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 10px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            max-width: 300px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .notification.success {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .notification.error {
-            background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
-        }
-
-        .notification.info {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #333;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            body {
-                padding: 0;
-                align-items: stretch; /* Stretch to fill viewport height */
-            }
-            .container {
-                margin: 0;
-                border-radius: 0;
-                min-height: 100vh;
-                box-shadow: none;
-            }
-            .form-container, .receipt {
-                padding: 15px;
-            }
-            .header h1 {
-                font-size: 20px;
-            }
-            .header p {
-                font-size: 13px;
-            }
-            .btn {
-                font-size: 16px;
-                padding: 12px;
-            }
+        .receipt-footer a:hover {
+            text-decoration: underline;
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo"></div>
-            <h1>โรงเรียนเลอวองจินตคณิต</h1>
-            <p>ระบบชำระเงินค่าเรียน</p>
-        </div>
-
-        <div id="formSection" class="form-container">
-            <form id="paymentForm" onsubmit="return handleFormSubmit(event)"> <div class="form-group">
-                    <label for="studentName">ชื่อนักเรียน</label>
-                    <input type="text" id="studentName" name="studentName" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="phoneNumber">เบอร์โทรศัพท์</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" required pattern="[0-9]{10}" title="กรุณากรอกเบอร์โทรศัพท์ 10 หลัก">
-                </div>
-
-                <div class="form-group">
-                    <label for="courseType">คอร์สหลัก (จินตคณิต)</label>
-                    <select id="courseType" name="courseType" required>
-                        <option value="">เลือกคอร์สหลัก</option>
-                        <option value="none">ไม่เลือกคอร์สหลัก (จ่ายเฉพาะค่าหนังสือ/อื่นๆ)</option>
-                        <option value="abacus_1m">จินตคณิต 1 เดือน - 1,200 บาท</option>
-                        <option value="abacus_1m_1w">จินตคณิต 1 เดือน+1 สัปดาห์ - 1,500 บาท</option>
-                        <option value="abacus_1_5m">จินตคณิต 1.5 เดือน - 1,800 บาท</option>
-                        <option value="abacus_2m">จินตคณิต 2 เดือน - 2,200 บาท (ประหยัด 200 บาท)</option>
-                        <option value="abacus_5m">จินตคณิต 6 เดือน - 6,000 บาท (ประหยัด 1,200 บาท)</option>
-                        <option value="abacus_9m">จินตคณิต 12 เดือน - 10,800 บาท (ประหยัด 3,600 บาท)</option>
-                        <option value="abacus_holiday">จินตคณิต คอร์สปิดเทอม 20 ชม. - 3,500 บาท (ราคาเต็ม 4,000, ประหยัด 500 บาท)</option>
-                        <option value="abacus_buffet">จินตคณิต คอร์สบุฟเฟต์ 20 ชม. - 3,500 บาท (ราคาเต็ม 4,000, ประหยัด 500 บาท)</option>
-                    </select>
-                </div>
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeEnglish" name="includeEnglish">
-                    <label for="includeEnglish">ภาษาอังกฤษ 1 เดือน - 1,000 บาท</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeMath1m" name="includeMath1m">
-                    <label for="includeMath1m">คณิตศาสตร์ 1 เดือน - 1,000 บาท</label>
-                </div>
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeMath2m" name="includeMath2m">
-                    <label for="includeMath2m">คณิตศาสตร์ 2 เดือน - 2,000 บาท</label>
-                </div>
-
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="includeAbacusBook" name="includeAbacusBook">
-                    <label for="includeAbacusBook">ค่าหนังสือจินตคณิต 180 บาท</label>
-                </div>
-                 <div class="checkbox-group">
-                    <input type="checkbox" id="includeEnglishBook" name="includeEnglishBook">
-                    <label for="includeEnglishBook">ค่าหนังสือภาษาอังกฤษ 100 บาท</label>
-                </div>
-                 <div class="checkbox-group">
-                    <input type="checkbox" id="includeMathBook" name="includeMathBook">
-                    <label for="includeMathBook">ค่าหนังสือคณิตศาสตร์ 100 บาท</label>
-                </div>
-
-
-                <div class="checkbox-group">
-                    <input type="checkbox" id="isNewStudent" name="isNewStudent">
-                    <label for="isNewStudent">นักเรียนสมัครใหม่</label>
-                </div>
-
-                <div class="checkbox-group" id="promotionGroup" style="display: none;">
-                    <input type="checkbox" id="newStudentPromotion" name="newStudentPromotion">
-                    <label for="newStudentPromotion">ใช้โปรโมชั่นนักเรียนใหม่ (ฟรีค่าสมัคร, ฟรีหนังสือ 1 เล่ม, ฟรีค่ากระเป๋า)</label>
-                </div>
-
-                <div class="price-display">
-                    <div class="price-row">
-                        <span>ค่าเรียน (ราคาเต็ม):</span>
-                        <span id="tuitionFullPrice">0 บาท</span>
-                    </div>
-                    <div class="price-row" id="abacusBookFeeRow" style="display: none;">
-                        <span>ค่าหนังสือจินตคณิต:</span>
-                        <span id="abacusBookFee">180 บาท</span>
-                    </div>
-                     <div class="price-row" id="englishBookFeeRow" style="display: none;">
-                        <span>ค่าหนังสือภาษาอังกฤษ:</span>
-                        <span id="englishBookFee">100 บาท</span>
-                    </div>
-                    <div class="price-row" id="mathBookFeeRow" style="display: none;">
-                        <span>ค่าหนังสือคณิตศาสตร์:</span>
-                        <span id="mathBookFee">100 บาท</span>
-                    </div>
-                    <div class="price-row" id="membershipFeeRow" style="display: none;">
-                        <span>ค่าสมาชิกแรกเข้า:</span>
-                        <span id="membershipFee">200 บาท</span>
-                    </div>
-                    <div class="price-row" id="bagFeeRow" style="display: none;">
-                        <span>ค่ากระเป๋า:</span>
-                        <span id="bagFee">150 บาท</span>
-                    </div>
-                    <div class="price-row" id="courseDiscountRow" style="display: none;">
-                        <span>ส่วนลด (โปรโมชั่นคอร์สหลัก):</span>
-                        <span id="courseDiscount" class="discount-text">-0 บาท</span>
-                    </div>
-                     <div class="price-row" id="comboDiscountRow" style="display: none;">
-                        <span>ส่วนลด (คอร์สเสริมคอมโบ):</span>
-                        <span id="comboDiscount" class="discount-text">-0 บาท</span>
-                    </div>
-                    <div class="price-row" id="newStudentDiscountRow" style="display: none;">
-                        <span>ส่วนลด (นักเรียนใหม่):</span>
-                        <span id="newStudentDiscount" class="discount-text">-0 บาท</span>
-                    </div>
-                    <div class="price-row total">
-                        <span>ยอดรวมสุทธิ:</span>
-                        <span id="totalAmount">0 บาท</span>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn">บันทึกการชำระเงิน</button>
-            </form>
-        </div>
- <div id="receiptSection" class="receipt">
-            <div class="receipt-header">
-                <div class="receipt-logo"></div>
-                <div class="receipt-title">โรงเรียนเลอวองจินตคณิต</div>
-                <div class="receipt-subtitle">ใบเสร็จรับเงิน</div>
-            </div>
-
-            <div class="receipt-info">
-                <div class="receipt-row">
-                    <span>ชื่อนักเรียน:</span>
-                    <span id="receiptStudentName"></span>
-                </div>
-                <div class="receipt-row">
-                    <span>เบอร์โทรศัพท์:</span>
-                    <span id="receiptPhoneNumber"></span>
-                </div>
-                <div class="receipt-row">
-                    <span>คอร์ส:</span>
-                    <span id="receiptCourse"></span>
-                </div>
-                <div class="receipt-row">
-                    <span>วันที่:</span>
-                    <span id="receiptDate"></span>
-                </div>
-            </div>
-
-            <div id="receiptDetails">
-                </div>
-
-            <div class="qr-section">
-                </div>
-
-            <div class="signature-section">
-                <div>ผู้รับเงิน</div>
-                <div class="signature-line" style="margin-top: 25px;"></div> </div>
-
-            <div class="receipt-footer">
-                <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
-                <p>โรงเรียนเลอวองจินตคณิต</p>
-                <p id="googleSheetLinkParagraph" style="margin-top: 10px; display: none;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
-            </div>
-
-            <button class="btn export-btn" id="exportPdfBtn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
-            <button class="btn back-btn" id="backToFormBtn" onclick="backToForm()">กลับหน้าแรก</button>
-        </div>
-    </div>
-    <script>
-    // TEMPORARY DEBUG: Check if script block is executed at all
-    // alert("Script Block Loaded!"); // สามารถลบทิ้งได้เมื่อใช้งานจริง
-
-    let paymentData = {};
-
-    // Define all course types and their properties
-    const coursePricing = {
-        'none': { display: 'ไม่เลือกคอร์สหลัก (จ่ายเฉพาะค่าหนังสือ/อื่นๆ)', type: 'none', basePrice: 0, nominalFull: 0, discount: 0, isAbacus: false },
-        'abacus_1m': { display: 'จินตคณิต 1 เดือน', type: 'abacus', basePrice: 1200, nominalFull: 1200, discount: 0, isAbacus: true },
-        'abacus_1m_1w': { display: 'จินตคณิต 1 เดือน+1 สัปดาห์', type: 'abacus', basePrice: 1500, nominalFull: 1500, discount: 0, isAbacus: true },
-        'abacus_1_5m': { display: 'จินตคณิต 1.5 เดือน', type: 'abacus', basePrice: 1800, nominalFull: 1800, discount: 0, isAbacus: true },
-        'abacus_2m': { display: 'จินตคณิต 2 เดือน', type: 'abacus', basePrice: 2200, nominalFull: 2400, discount: 200, isAbacus: true },
-        'abacus_5m': { display: 'จินตคณิต 6 เดือน', type: 'abacus', basePrice: 6000, nominalFull: 7200, discount: 1200, isAbacus: true },
-        'abacus_9m': { display: 'จินตคณิต 12 เดือน', type: 'abacus', basePrice: 10800, nominalFull: 14400, discount: 3600, isAbacus: true },
-        'abacus_holiday': { display: 'จินตคณิต คอร์สปิดเทอม 20 ชม.', type: 'abacus_special', basePrice: 3500, nominalFull: 4000, discount: 500, isAbacus: true },
-        'abacus_buffet': { display: 'จินตคณิต คอร์สบุฟเฟต์ 20 ชม.', type: 'abacus_special', basePrice: 3500, nominalFull: 4000, discount: 500, isAbacus: true },
-    };
-
-    const ENGLISH_PRICE = 1000;
-    const MATH_1M_PRICE = 1000;
-    const MATH_2M_PRICE = 2000;
-    const COMBO_DISCOUNT_PER_SUBJECT = 100; // ลด 100 บาท ต่อวิชาที่เข้าร่วมคอมโบ (รวม 200 หรือ 300)
-
-    const ABACUS_BOOK_PRICE_VAL = 180;
-    const ENGLISH_BOOK_PRICE_VAL = 100;
-    const MATH_BOOK_PRICE_VAL = 100;
-    const MEMBERSHIP_FEE_VAL = 200;
-    const BAG_PRICE_VAL = 150;
-
-    // Event listeners
-    document.getElementById('courseType').addEventListener('change', updatePricing);
-    document.getElementById('includeAbacusBook').addEventListener('change', updatePricing);
-    document.getElementById('includeEnglishBook').addEventListener('change', updatePricing);
-    document.getElementById('includeMathBook').addEventListener('change', updatePricing);
-    document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
-    document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
-    document.getElementById('includeEnglish').addEventListener('change', updatePricing);
-    document.getElementById('includeMath1m').addEventListener('change', updatePricing);
-    document.getElementById('includeMath2m').addEventListener('change', updatePricing);
-
-    // Initial call to set up prices on page load
-    updatePricing();
-
-    function handleNewStudentChange() {
-        const isNewStudent = document.getElementById('isNewStudent').checked;
-        const promotionGroup = document.getElementById('promotionGroup');
-
-        if (isNewStudent) {
-            promotionGroup.style.display = 'flex';
-        } else {
-            promotionGroup.style.display = 'none';
-            document.getElementById('newStudentPromotion').checked = false; // Uncheck promo if not new student
-        }
-        updatePricing();
-    }
-
-    function updatePricing() {
-        const courseTypeSelected = document.getElementById('courseType').value;
-        const includeAbacusBook = document.getElementById('includeAbacusBook').checked;
-        const includeEnglishBook = document.getElementById('includeEnglishBook').checked;
-        const includeMathBook = document.getElementById('includeMathBook').checked;
-        const isNewStudent = document.getElementById('isNewStudent').checked;
-        const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
-        const includeEnglish = document.getElementById('includeEnglish').checked;
-        const includeMath1m = document.getElementById('includeMath1m').checked;
-        const includeMath2m = document.getElementById('includeMath2m').checked;
-
-        let abacusCourseFullPrice = 0;
-        let abacusCourseActualPrice = 0;
-        let abacusCourseDiscount = 0; // Discount inherent to abacus course itself
-
-        let englishFullPrice = 0;
-        let englishActualPrice = 0; // อาจถูกลดด้วยคอมโบ
-        let math1mFullPrice = 0;
-        let math2mFullPrice = 0;
-        let mathActualPrice = 0; // For combined math display in receipt
-
-        let tempAbacusComboDiscount = 0;
-        let tempEnglishComboDiscount = 0;
-        let tempMathComboDiscount = 0;
-
-        let newStudentPromoDiscount = 0;
-
-        let actualAbacusBookFee = 0;
-        let actualEnglishBookFee = 0;
-        let actualMathBookFee = 0;
-        let actualMembershipFee = 0;
-        let actualBagFee = 0;
-
-        const selectedMainCourse = coursePricing[courseTypeSelected];
-        const hasAbacusCourseSelected = selectedMainCourse && selectedMainCourse.isAbacus;
-        const isEnglishSelected = includeEnglish;
-        const isMathSelected = includeMath1m || includeMath2m;
-
-        // 1. Calculate Abacus course pricing
-        if (selectedMainCourse && selectedMainCourse.type !== 'none') {
-            abacusCourseActualPrice = selectedMainCourse.basePrice;
-            abacusCourseFullPrice = selectedMainCourse.nominalFull;
-            abacusCourseDiscount = selectedMainCourse.discount;
-        }
-
-        // 2. Calculate English and Math pricing
-        if (isEnglishSelected) {
-            englishFullPrice = ENGLISH_PRICE;
-            englishActualPrice = ENGLISH_PRICE;
-        }
-        if (includeMath1m) {
-            math1mFullPrice = MATH_1M_PRICE;
-            mathActualPrice += MATH_1M_PRICE;
-        }
-        if (includeMath2m) {
-            math2mFullPrice = MATH_2M_PRICE;
-            mathActualPrice += MATH_2M_PRICE;
-        }
-
-        // 3. Apply Combo Discounts
-        if (hasAbacusCourseSelected) {
-            if (isEnglishSelected && isMathSelected) { // Scenario: Abacus + English + Math (3 subjects)
-                tempEnglishComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempMathComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempAbacusComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-
-            } else if (isEnglishSelected) { // Scenario: Abacus + English (2 subjects)
-                tempEnglishComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempAbacusComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-            } else if (isMathSelected) { // Scenario: Abacus + Math (2 subjects)
-                tempMathComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempAbacusComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-            }
-        }
-
-        englishActualPrice -= tempEnglishComboDiscount;
-        mathActualPrice -= tempMathComboDiscount;
-        abacusCourseActualPrice -= tempAbacusComboDiscount;
-
-        // 4. Calculate initial additional fees (before new student promo)
-        if (includeAbacusBook) {
-            actualAbacusBookFee = ABACUS_BOOK_PRICE_VAL;
-        }
-        if (includeEnglishBook) {
-            actualEnglishBookFee = ENGLISH_BOOK_PRICE_VAL;
-        }
-        if (includeMathBook) {
-            actualMathBookFee = MATH_BOOK_PRICE_VAL;
-        }
-
-        if (isNewStudent) {
-            actualMembershipFee = MEMBERSHIP_FEE_VAL;
-            actualBagFee = BAG_PRICE_VAL;
-        }
-
-        // 5. Apply new student promotion discount if selected
-        // *** MODIFIED LOGIC FOR NEW STUDENT PROMOTION (ONLY ABACUS BOOK, MEMBERSHIP, BAG) ***
-        if (isNewStudent && newStudentPromotion) {
-            // Deduct membership fee if it was included (i.e., if it has a value)
-            if (actualMembershipFee > 0) {
-                newStudentPromoDiscount += actualMembershipFee;
-                actualMembershipFee = 0; // Set to 0 because it's now free
-            }
-            // Deduct bag fee if it was included
-            if (actualBagFee > 0) {
-                newStudentPromoDiscount += actualBagFee;
-                actualBagFee = 0; // Set to 0 because it's now free
-            }
-            // Only discount Abacus book if it was included
-            if (actualAbacusBookFee > 0 && includeAbacusBook) {
-                newStudentPromoDiscount += actualAbacusBookFee;
-                actualAbacusBookFee = 0; // Set to 0 because it's now free
-            }
-            // English book and Math book are NOT discounted by this promo.
-            // Their 'actual' fees should remain as calculated before this promo block.
-        }
-
-        // Calculate total full price for display
-        const totalFullPrice = abacusCourseFullPrice + englishFullPrice + math1mFullPrice + math2mFullPrice;
-
-        // Calculate total actual price
-        const finalTotal = abacusCourseActualPrice + englishActualPrice + mathActualPrice + actualAbacusBookFee + actualEnglishBookFee + actualMathBookFee + actualMembershipFee + actualBagFee;
-
-
-        // --- Update Display (Form Section) ---
-        document.getElementById('tuitionFullPrice').textContent = totalFullPrice.toLocaleString() + ' บาท';
-
-        document.getElementById('abacusBookFeeRow').style.display = actualAbacusBookFee > 0 ? 'flex' : 'none';
-        document.getElementById('abacusBookFee').textContent = actualAbacusBookFee.toLocaleString() + ' บาท';
-
-        document.getElementById('englishBookFeeRow').style.display = actualEnglishBookFee > 0 ? 'flex' : 'none';
-        document.getElementById('englishBookFee').textContent = actualEnglishBookFee.toLocaleString() + ' บาท';
-
-        document.getElementById('mathBookFeeRow').style.display = actualMathBookFee > 0 ? 'flex' : 'none';
-        document.getElementById('mathBookFee').textContent = actualMathBookFee.toLocaleString() + ' บาท';
-
-        document.getElementById('membershipFeeRow').style.display = actualMembershipFee > 0 ? 'flex' : 'none';
-        document.getElementById('membershipFee').textContent = actualMembershipFee.toLocaleString() + ' บาท';
-
-        document.getElementById('bagFeeRow').style.display = actualBagFee > 0 ? 'flex' : 'none';
-        document.getElementById('bagFee').textContent = actualBagFee.toLocaleString() + ' บาท';
-
-        document.getElementById('courseDiscountRow').style.display = abacusCourseDiscount > 0 ? 'flex' : 'none'; // Only Abacus inherent discount
-        document.getElementById('courseDiscount').textContent = '-' + abacusCourseDiscount.toLocaleString() + ' บาท';
-
-        const totalComboDiscountForDisplay = tempEnglishComboDiscount + tempMathComboDiscount + tempAbacusComboDiscount;
-        document.getElementById('comboDiscountRow').style.display = totalComboDiscountForDisplay > 0 ? 'flex' : 'none'; // Show if any combo discount
-        document.getElementById('comboDiscount').textContent = '-' + totalComboDiscountForDisplay.toLocaleString() + ' บาท'; // Display combined combo discount here
-
-        document.getElementById('newStudentDiscountRow').style.display = newStudentPromoDiscount > 0 ? 'flex' : 'none';
-        document.getElementById('newStudentDiscount').textContent = '-' + newStudentPromoDiscount.toLocaleString() + ' บาท';
-
-        document.getElementById('totalAmount').textContent = finalTotal.toLocaleString() + ' บาท';
-    }
-
-    function handleFormSubmit(e) {
-        // console.log("handleFormSubmit is called! Checking console for more info."); // Temporary alert for debugging
-        e.preventDefault(); // Prevent default form submission behavior
-
-        const studentName = document.getElementById('studentName').value;
-        const phoneNumber = document.getElementById('phoneNumber').value;
-        const courseTypeSelected = document.getElementById('courseType').value;
-        const includeAbacusBook = document.getElementById('includeAbacusBook').checked;
-        const includeEnglishBook = document.getElementById('includeEnglishBook').checked;
-        const includeMathBook = document.getElementById('includeMathBook').checked;
-        const isNewStudent = document.getElementById('isNewStudent').checked;
-        const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
-        const includeEnglish = document.getElementById('includeEnglish').checked;
-        const includeMath1m = document.getElementById('includeMath1m').checked;
-        const includeMath2m = document.getElementById('includeMath2m').checked;
-        const otherFee = parseFloat(document.getElementById('otherFee').value) || 0;
-        const paymentMethod = document.getElementById('paymentMethod').value;
-        const bankAccount = document.getElementById('bankAccount').value;
-
-        // Validation: Must select at least one payable item or fill other fee
-        if (!studentName || !phoneNumber || (courseTypeSelected === 'none' && !includeAbacusBook && !includeEnglishBook && !includeMathBook && !includeEnglish && !includeMath1m && !includeMath2m && otherFee === 0)) {
-            alert('กรุณากรอกข้อมูลนักเรียนและเลือกอย่างน้อยหนึ่งรายการที่ต้องชำระ หรือกรอกค่าใช้จ่ายอื่นๆ');
-            console.log("handleFormSubmit: Validation failed.");
-            return;
-        }
-
-        // --- Recalculate everything for paymentData (final values for receipt/sheets) ---
-        let abacusCourseFullPrice = 0;
-        let abacusCourseActualPrice = 0;
-        let abacusCourseDiscount = 0;
-
-        let englishFullPrice = 0;
-        let englishActualPrice = 0;
-        let math1mFullPrice = 0;
-        let math2mFullPrice = 0;
-        let mathActualPrice = 0;
-
-        let tempAbacusComboDiscount = 0;
-        let tempEnglishComboDiscount = 0;
-        let tempMathComboDiscount = 0;
-
-        let newStudentPromoDiscount = 0;
-
-        let actualAbacusBookFee = 0;
-        let actualEnglishBookFee = 0;
-        let actualMathBookFee = 0;
-        let actualMembershipFee = 0;
-        let actualBagFee = 0;
-
-        const selectedMainCourse = coursePricing[courseTypeSelected];
-        const hasAbacusCourseSelected = selectedMainCourse && selectedMainCourse.isAbacus;
-        const isEnglishSelected = includeEnglish;
-        const isMathSelected = includeMath1m || includeMath2m;
-
-        // 1. Calculate Abacus course pricing
-        if (selectedMainCourse && selectedMainCourse.type !== 'none') {
-            abacusCourseActualPrice = selectedMainCourse.basePrice;
-            abacusCourseFullPrice = selectedMainCourse.nominalFull;
-            abacusCourseDiscount = selectedMainCourse.discount;
-        }
-
-        // 2. Calculate English and Math pricing
-        if (isEnglishSelected) {
-            englishFullPrice = ENGLISH_PRICE;
-            englishActualPrice = ENGLISH_PRICE;
-        }
-        if (includeMath1m) {
-            math1mFullPrice = MATH_1M_PRICE;
-            mathActualPrice += MATH_1M_PRICE;
-        }
-        if (includeMath2m) {
-            math2mFullPrice = MATH_2M_PRICE;
-            mathActualPrice += MATH_2M_PRICE;
-        }
-
-        // 3. Apply Combo Discounts
-        if (hasAbacusCourseSelected) {
-            if (isEnglishSelected && isMathSelected) { // Scenario: Abacus + English + Math (3 subjects)
-                tempEnglishComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempMathComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempAbacusComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-            } else if (isEnglishSelected) { // Scenario: Abacus + English (2 subjects)
-                tempEnglishComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempAbacusComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-            } else if (isMathSelected) { // Scenario: Abacus + Math (2 subjects)
-                tempMathComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-                tempAbacusComboDiscount = COMBO_DISCOUNT_PER_SUBJECT;
-            }
-        }
-
-        englishActualPrice -= tempEnglishComboDiscount;
-        mathActualPrice -= tempMathComboDiscount;
-        abacusCourseActualPrice -= tempAbacusComboDiscount;
-
-        // 4. Calculate initial additional fees (before new student promo)
-        if (includeAbacusBook) {
-            actualAbacusBookFee = ABACUS_BOOK_PRICE_VAL;
-        }
-        if (includeEnglishBook) {
-            actualEnglishBookFee = ENGLISH_BOOK_PRICE_VAL;
-        }
-        if (includeMathBook) {
-            actualMathBookFee = MATH_BOOK_PRICE_VAL;
-        }
-
-        if (isNewStudent) {
-            actualMembershipFee = MEMBERSHIP_FEE_VAL;
-            actualBagFee = BAG_PRICE_VAL;
-        }
-
-        // 5. Apply new student promotion discount if selected
-        if (isNewStudent && newStudentPromotion) {
-            if (actualMembershipFee > 0) {
-                newStudentPromoDiscount += actualMembershipFee;
-                actualMembershipFee = 0;
-            }
-            if (actualBagFee > 0) {
-                newStudentPromoDiscount += actualBagFee;
-                actualBagFee = 0;
-            }
-            if (actualAbacusBookFee > 0 && includeAbacusBook) {
-                newStudentPromoDiscount += actualAbacusBookFee;
-                actualAbacusBookFee = 0;
-            }
-        }
-
-        // Calculate total full price (nominal price before any discounts)
-        const totalFullPrice = abacusCourseFullPrice + englishFullPrice + math1mFullPrice + math2mFullPrice + ABACUS_BOOK_PRICE_VAL * (includeAbacusBook ? 1 : 0) + ENGLISH_BOOK_PRICE_VAL * (includeEnglishBook ? 1 : 0) + MATH_BOOK_PRICE_VAL * (includeMathBook ? 1 : 0) + MEMBERSHIP_FEE_VAL * (isNewStudent ? 1 : 0) + BAG_PRICE_VAL * (isNewStudent ? 1 : 0);
-
-        // Calculate total actual price paid
-        const finalTotal = abacusCourseActualPrice + englishActualPrice + mathActualPrice + actualAbacusBookFee + actualEnglishBookFee + actualMathBookFee + actualMembershipFee + actualBagFee + otherFee;
-
-        // Prepare paymentData object
-        paymentData = {
-            studentName: studentName,
-            phoneNumber: phoneNumber,
-            course: selectedMainCourse.display,
-            courseType: courseTypeSelected,
-            abacusCoursePrice: selectedMainCourse.basePrice,
-            englishPrice: isEnglishSelected ? ENGLISH_PRICE : 0,
-            math1mPrice: includeMath1m ? MATH_1M_PRICE : 0,
-            math2mPrice: includeMath2m ? MATH_2M_PRICE : 0,
-            abacusBook: includeAbacusBook ? ABACUS_BOOK_PRICE_VAL : 0,
-            englishBook: includeEnglishBook ? ENGLISH_BOOK_PRICE_VAL : 0,
-            mathBook: includeMathBook ? MATH_BOOK_PRICE_VAL : 0,
-            membershipFee: isNewStudent ? MEMBERSHIP_FEE_VAL : 0,
-            bagFee: isNewStudent ? BAG_PRICE_VAL : 0,
-            otherFee: otherFee,
-            totalFullPrice: totalFullPrice,
-            abacusCourseDiscount: abacusCourseDiscount,
-            comboDiscount: tempAbacusComboDiscount + tempEnglishComboDiscount + tempMathComboDiscount, // Combined combo discount
-            newStudentDiscount: newStudentPromoDiscount,
-            finalTotal: finalTotal,
-            paymentMethod: paymentMethod,
-            bankAccount: bankAccount,
-            timestamp: new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) // Current date and time in Thai locale
-        };
-        console.log("Payment Data:", paymentData);
-
-        // Populate receipt details
-        document.getElementById('receiptStudentName').textContent = paymentData.studentName;
-        document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
-        document.getElementById('receiptCourse').textContent = paymentData.course;
-        document.getElementById('receiptDate').textContent = paymentData.timestamp;
-
-        const receiptDetailsDiv = document.getElementById('receiptDetails');
-        receiptDetailsDiv.innerHTML = `
-            ${paymentData.courseType !== 'none' ? `<div class="receipt-row"><span>ค่าคอร์สจินตคณิต (${coursePricing[paymentData.courseType].display}):</span><span>${selectedMainCourse.basePrice.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.englishPrice > 0 ? `<div class="receipt-row"><span>ค่าคอร์สภาษาอังกฤษ:</span><span>${ENGLISH_PRICE.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.math1mPrice > 0 && paymentData.math2mPrice === 0 ? `<div class="receipt-row"><span>ค่าคอร์สคณิตศาสตร์ (1 เดือน):</span><span>${MATH_1M_PRICE.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.math2mPrice > 0 && paymentData.math1mPrice === 0 ? `<div class="receipt-row"><span>ค่าคอร์สคณิตศาสตร์ (2 เดือน):</span><span>${MATH_2M_PRICE.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.math1mPrice > 0 && paymentData.math2mPrice > 0 ? `<div class="receipt-row"><span>ค่าคอร์สคณิตศาสตร์ (1 เดือน + 2 เดือน):</span><span>${(MATH_1M_PRICE + MATH_2M_PRICE).toLocaleString()} บาท</span></div>` : ''}
-            
-            ${paymentData.abacusBook > 0 ? `<div class="receipt-row"><span>ค่าหนังสือจินตคณิต:</span><span>${ABACUS_BOOK_PRICE_VAL.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.englishBook > 0 ? `<div class="receipt-row"><span>ค่าหนังสือภาษาอังกฤษ:</span><span>${ENGLISH_BOOK_PRICE_VAL.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.mathBook > 0 ? `<div class="receipt-row"><span>ค่าหนังสือคณิตศาสตร์:</span><span>${MATH_BOOK_PRICE_VAL.toLocaleString()} บาท</span></div>` : ''}
-            
-            ${paymentData.membershipFee > 0 ? `<div class="receipt-row"><span>ค่าสมาชิก:</span><span>${MEMBERSHIP_FEE_VAL.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.bagFee > 0 ? `<div class="receipt-row"><span>ค่ากระเป๋า:</span><span>${BAG_PRICE_VAL.toLocaleString()} บาท</span></div>` : ''}
-            
-            ${paymentData.otherFee > 0 ? `<div class="receipt-row"><span>ค่าใช้จ่ายอื่นๆ:</span><span>${paymentData.otherFee.toLocaleString()} บาท</span></div>` : ''}
-
-            ${paymentData.abacusCourseDiscount > 0 ? `<div class="receipt-row discount-row"><span>ส่วนลดคอร์สหลัก:</span><span>-${paymentData.abacusCourseDiscount.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.comboDiscount > 0 ? `<div class="receipt-row discount-row"><span>ส่วนลดคอร์สเสริม:</span><span>-${paymentData.comboDiscount.toLocaleString()} บาท</span></div>` : ''}
-            ${paymentData.newStudentDiscount > 0 ? `<div class="receipt-row discount-row"><span>ส่วนลดนักเรียนใหม่:</span><span>-${paymentData.newStudentDiscount.toLocaleString()} บาท</span></div>` : ''}
-            <div class="receipt-separator"></div>
-            <div class="receipt-row total-row">
-                <span>ยอดรวมสุทธิ:</span>
-                <span id="receiptTotalAmount">${paymentData.finalTotal.toLocaleString()} บาท</span>
-            </div>
-            <div class="receipt-row">
-                <span>วิธีการชำระเงิน:</span>
-                <span>${paymentData.paymentMethod} ${paymentData.bankAccount ? ` (${paymentData.bankAccount})` : ''}</span>
-            </div>
-        `;
-
-        // Generate QR code based on payment method
-        const qrSection = document.getElementById('qrSection');
-        qrSection.innerHTML = ''; // Clear previous QR
-
-        if (paymentData.paymentMethod === 'promptpay' && paymentData.bankAccount === 'พร้อมเพย์') {
-            const qrCodeData = `00020101021230680016A0000006770101110213000000000001015204690053037645802TH5914โรงเรียนเลอวอง6007Bangkok6105103106304${(paymentData.finalTotal * 100).toFixed(0)}0000`; // Example QR data (replace with actual PromptPay details)
-            const qr = new QRious({
-                element: document.createElement('canvas'),
-                value: qrCodeData,
-                size: 150
-            });
-            qrSection.appendChild(qr.element);
-            qrSection.style.display = 'block';
-        } else {
-            qrSection.style.display = 'none';
-        }
-
-
-        // Show receipt section and hide form
-        document.getElementById('formSection').style.display = 'none';
-        document.getElementById('receiptSection').style.display = 'block';
-        document.getElementById('googleSheetLinkParagraph').style.display = 'block'; // Show the link after submission
-        sendDataToGoogleSheets(paymentData);
-    }
-
-    function sendDataToGoogleSheets(data) {
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbx_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a to help me create a comprehensive JavaScript solution for managing student courses and payments.
-
-Here's the detailed functionality I need:
-
-1.  **Student and Course Data Management:**
-    * **Student Information:** `studentName` (string), `phoneNumber` (string).
-    * **Course Selection:** Students can select **one main Abacus course** from a predefined list.
-        * `courseType`: (string - key from `coursePricing` object).
-        * The `coursePricing` object you provided is good, let's keep it.
-    * **Additional Subjects:** Students can optionally add English and/or Math courses.
-        * `includeEnglish`: (boolean)
-        * `includeMath1m`: (boolean - Math 1 month)
-        * `includeMath2m`: (boolean - Math 2 months)
-    * **Material Fees:** Optional inclusion of Abacus, English, and Math books.
-        * `includeAbacusBook`: (boolean)
-        * `includeEnglishBook`: (boolean)
-        * `includeMathBook`: (boolean)
-    * **New Student Fees:** For new students, include membership fee and bag fee.
-        * `isNewStudent`: (boolean)
-        * `newStudentPromotion`: (boolean - if true, Abacus book, membership, and bag are free for new students).
-    * **Other Fees:** A flexible input for any additional charges.
-        * `otherFee`: (number)
-    * **Payment Method:**
-        * `paymentMethod`: (string - e.g., 'cash', 'transfer', 'promptpay')
-        * `bankAccount`: (string - e.g., 'ธนาคารกรุงเทพ', 'ธนาคารกสิกรไทย', 'พร้อมเพย์') - only applicable if `paymentMethod` is 'transfer' or 'promptpay'.
-
-2.  **Pricing and Discount Logic (already largely implemented, but ensure correctness):**
-    * **Base Course Price:** From `coursePricing` object.
-    * **Subject Prices:** `ENGLISH_PRICE`, `MATH_1M_PRICE`, `MATH_2M_PRICE`.
-    * **Combo Discount:** If a student takes an Abacus course AND English AND/OR Math, apply a `COMBO_DISCOUNT_PER_SUBJECT` (100 THB) discount per subject involved in the combo (up to 300 THB if Abacus + English + Math). This discount should reduce the **actual price** of each combo-participating subject.
-    * **New Student Promotion:** If `isNewStudent` is true AND `newStudentPromotion` is true, then `MEMBERSHIP_FEE_VAL`, `BAG_PRICE_VAL`, and `ABACUS_BOOK_PRICE_VAL` should become 0 (free). This should be reflected as a discount in the total.
-    * **Total Full Price (Nominal):** Sum of all *original* course, subject, and material fees *before* any discounts. This is for display purposes to show savings.
-    * **Final Total (Actual Payment):** Sum of all *actual* prices after applying all discounts and adding other fees.
-
-3.  **User Interface Interaction:**
-    * **Form Submission:** When the form is submitted (`id="paymentForm"`), prevent default submission.
-    * **Validation:** Basic validation to ensure `studentName`, `phoneNumber` are not empty, and at least one payable item (course, book, or other fee) is selected/entered. If validation fails, show an alert.
-    * **Dynamic Price Update:** The `updatePricing()` function should recalculate and update displayed prices (`tuitionFullPrice`, `abacusBookFee`, etc.) *immediately* whenever a relevant form input changes (e.g., course selection, checkbox for books/subjects, new student checkbox, promotion checkbox, other fee input).
-    * **Conditional Display:**
-        * The "New Student Promotion" checkbox (`newStudentPromotion`) should only appear if `isNewStudent` is checked.
-        * Receipt section (`receiptSection`) should be hidden initially and shown upon successful form submission.
-        * Form section (`formSection`) should be hidden upon successful form submission.
-        * `googleSheetLinkParagraph` should only be displayed after successful form submission.
-        * Rows for fees/discounts in the form and receipt should only be displayed if their value is greater than 0.
-        * The QR section should only appear on the receipt if the payment method is 'promptpay' and the bank account is 'พร้อมเพย์'.
-
-4.  **Receipt Generation (dynamic):**
-    * Populate `receiptStudentName`, `receiptPhoneNumber`, `receiptCourse`, `receiptDate` with submitted data.
-    * Dynamically generate the `receiptDetails` section (`id="receiptDetails"`) to list all items charged and applied discounts, along with their individual prices/discounts.
-        * Display individual course/subject fees if selected.
-        * Display individual book/material fees if selected.
-        * Display membership and bag fees if applicable.
-        * Display "Other Fees" if entered.
-        * Display separate lines for "ส่วนลดคอร์สหลัก" (abacusCourseDiscount), "ส่วนลดคอร์สเสริม" (comboDiscount), and "ส่วนลดนักเรียนใหม่" (newStudentDiscount) if greater than 0.
-        * Show `receiptTotalAmount` as the `finalTotal`.
-        * Show `paymentMethod` and `bankAccount` (if applicable).
-    * **QR Code Generation:** For PromptPay, generate a QR code using `QRious.js` with the `finalTotal`.
-    * **"สำเนาใบเสร็จสำหรับผู้ปกครอง"** and **"โรงเรียนเลอวองจินตคณิต"** should always be at the footer.
-
-5.  **Integration with Google Sheets (Crucial):**
-    * Upon successful form submission, **send the `paymentData` object** to a Google Apps Script Web App.
-    * The `scriptURL` for the Google Apps Script is: `https://script.google.com/macros/s/AKfycbx_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a2C6f_a to provide the final, complete code.
-
-```html
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบออกใบเสร็จโรงเรียนเลอวองจินตคณิต</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js](https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js)"></script>
-    <script src="[https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js](https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js)"></script>
 </head>
 <body>
 
@@ -1047,8 +275,6 @@ Here's the detailed functionality I need:
                 <label for="phoneNumber">เบอร์โทรศัพท์:</label>
                 <input type="tel" id="phoneNumber" pattern="[0-9]{10}" placeholder="08xxxxxxxx" required>
             </div>
-
-            <hr>
 
             <h2>ค่าใช้จ่าย</h2>
 
@@ -1114,8 +340,6 @@ Here's the detailed functionality I need:
                 <input type="number" id="otherFee" value="0" min="0">
             </div>
 
-            <hr>
-
             <h2>สรุปยอดชำระ</h2>
             <div class="summary-row">
                 <span>ยอดรวม (ราคาก่อนหักส่วนลด):</span>
@@ -1158,8 +382,6 @@ Here's the detailed functionality I need:
                 <span id="totalAmount">0 บาท</span>
             </div>
 
-            <hr>
-
             <h2>ช่องทางการชำระเงิน</h2>
             <div class="form-group">
                 <label for="paymentMethod">วิธีการชำระเงิน:</label>
@@ -1200,7 +422,7 @@ Here's the detailed functionality I need:
                     <span id="receiptPhoneNumber"></span>
                 </div>
                 <div class="receipt-row">
-                    <span>คอร์ส:</span>
+                    <span>คอร์สหลัก:</span>
                     <span id="receiptCourse"></span>
                 </div>
                 <div class="receipt-row">
@@ -1209,7 +431,7 @@ Here's the detailed functionality I need:
                 </div>
             </div>
 
-            <div id="receiptDetails">
+            <div id="receiptDetails" class="receipt-details-section">
                 </div>
 
             <div class="qr-section" id="qrSection" style="display: none;">
@@ -1217,13 +439,13 @@ Here's the detailed functionality I need:
 
             <div class="signature-section">
                 <div>ผู้รับเงิน</div>
-                <div class="signature-line" style="margin-top: 25px;"></div>
+                <div class="signature-line"></div>
             </div>
 
             <div class="receipt-footer">
                 <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
                 <p>โรงเรียนเลอวองจินตคณิต</p>
-                <p id="googleSheetLinkParagraph" style="margin-top: 10px; display: none;">📝 ตรวจสอบข้อมูลได้ที่: <a href="[https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYnak/edit?gid=0#gid=0](https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYnak/edit?gid=0#gid=0)" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
+                <p id="googleSheetLinkParagraph" style="margin-top: 10px; display: none;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYnak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
             </div>
 
             <button class="btn export-btn" id="exportPdfBtn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
@@ -1232,44 +454,33 @@ Here's the detailed functionality I need:
     </div>
 
     <script>
-        // Event listener for payment method change to show/hide bank account selection
-        document.getElementById('paymentMethod').addEventListener('change', function() {
-            const paymentMethod = this.value;
-            const bankAccountGroup = document.getElementById('bankAccountGroup');
-            if (paymentMethod === 'transfer' || paymentMethod === 'promptpay') {
-                bankAccountGroup.style.display = 'flex';
-                // If PromptPay is selected, auto-select 'พร้อมเพย์' in bankAccount
-                if (paymentMethod === 'promptpay') {
-                    document.getElementById('bankAccount').value = 'พร้อมเพย์';
-                }
-            } else {
-                bankAccountGroup.style.display = 'none';
-            }
-        });
+        // Global object to store payment data
+        let paymentData = {};
 
-        // Event listener for otherFee input to trigger price update
-        document.getElementById('otherFee').addEventListener('input', updatePricing);
+        // Define all course types and their properties
+        const coursePricing = {
+            'none': { display: 'ไม่เลือกคอร์สหลัก', type: 'none', basePrice: 0, nominalFull: 0, discount: 0, isAbacus: false },
+            'abacus_1m': { display: 'จินตคณิต 1 เดือน', type: 'abacus', basePrice: 1200, nominalFull: 1200, discount: 0, isAbacus: true },
+            'abacus_1m_1w': { display: 'จินตคณิต 1 เดือน+1 สัปดาห์', type: 'abacus', basePrice: 1500, nominalFull: 1500, discount: 0, isAbacus: true },
+            'abacus_1_5m': { display: 'จินตคณิต 1.5 เดือน', type: 'abacus', basePrice: 1800, nominalFull: 1800, discount: 0, isAbacus: true },
+            'abacus_2m': { display: 'จินตคณิต 2 เดือน', type: 'abacus', basePrice: 2200, nominalFull: 2400, discount: 200, isAbacus: true },
+            'abacus_5m': { display: 'จินตคณิต 6 เดือน', type: 'abacus', basePrice: 6000, nominalFull: 7200, discount: 1200, isAbacus: true },
+            'abacus_9m': { display: 'จินตคณิต 12 เดือน', type: 'abacus', basePrice: 10800, nominalFull: 14400, discount: 3600, isAbacus: true },
+            'abacus_holiday': { display: 'จินตคณิต คอร์สปิดเทอม 20 ชม.', type: 'abacus_special', basePrice: 3500, nominalFull: 4000, discount: 500, isAbacus: true },
+            'abacus_buffet': { display: 'จินตคณิต คอร์สบุฟเฟต์ 20 ชม.', type: 'abacus_special', basePrice: 3500, nominalFull: 4000, discount: 500, isAbacus: true },
+        };
 
+        const ENGLISH_PRICE = 1000;
+        const MATH_1M_PRICE = 1000;
+        const MATH_2M_PRICE = 2000;
+        const COMBO_DISCOUNT_PER_SUBJECT = 100; // ลด 100 บาท ต่อวิชาที่เข้าร่วมคอมโบ (รวม 200 หรือ 300)
 
-        function exportToPDF() {
-            const element = document.getElementById('receiptSection');
-            const opt = {
-                margin:       10,
-                filename:     'ใบเสร็จรับเงิน_Le-Vong_' + paymentData.studentName + '.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
+        const ABACUS_BOOK_PRICE_VAL = 180;
+        const ENGLISH_BOOK_PRICE_VAL = 100;
+        const MATH_BOOK_PRICE_VAL = 100;
+        const MEMBERSHIP_FEE_VAL = 200;
+        const BAG_PRICE_VAL = 150;
 
-        function backToForm() {
-            document.getElementById('formSection').style.display = 'block';
-            document.getElementById('receiptContainer').style.display = 'none';
-            document.getElementById('paymentForm').reset(); // Clear form fields
-            updatePricing(); // Recalculate and reset displayed prices
-        }
-    </script>
-</body>
-</html>
-    
+        // URL สำหรับ Google Apps Script Web App ของคุณ
+        // !!! สำคัญ: ต้องเปลี่ยน URL นี้เป็นของ Web App ของคุณเอง !!!
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzcDVc0SplOpHPcwYfCBQ8kxQqC2qVzoc7Et0tSClrHfYo3Opc5OkLJNn5oGSHdHOVT/exec'
