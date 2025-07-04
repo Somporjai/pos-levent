@@ -931,7 +931,7 @@
             // Assemble paymentData object
             paymentData = {
                 studentName,
-                phoneNumber,
+                phoneNumber: '+' + phoneNumber, // <--- เพิ่ม '+' เข้าไปด้านหน้าเบอร์โทร
                 courseName: receiptCourseName, // Display name for receipt
 
                 // Course pricing details (actuals after inherent discounts and combo discounts)
@@ -1098,7 +1098,7 @@
             document.getElementById('receiptSection').style.display = 'block';
 
             document.getElementById('receiptStudentName').textContent = paymentData.studentName;
-            document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
+            document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber.startsWith('+') ? paymentData.phoneNumber.substring(1) : paymentData.phoneNumber; // <--- เพิ่ม Logic ตัด '+' ออกก่อนแสดงผล
             document.getElementById('receiptDate').textContent = paymentData.date;
 
             const receiptDetailsDiv = document.getElementById('receiptDetails');
