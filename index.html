@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบ POS - เลอวองจินตคณิต</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -485,7 +485,7 @@
             <div class="receipt-footer">
                 <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
                 <p>โรงเรียนเลอวองจินตคณิต</p>
-                <p id="googleSheetLinkParagraph" class="hide-on-pdf" style="margin-top: 10px;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
+                <p id="googleSheetLinkParagraph" style="margin-top: 10px; display: none;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
             </div>
 
             <button class="btn export-btn" id="exportPdfBtn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
@@ -494,467 +494,474 @@
     </div>
 
     <script>
-    let paymentData = {};
+        let paymentData = {};
 
-    // Course pricing (includes 'display' for dropdown and 'nominalFullPrice', 'savedAmount' for internal logic)
-    const coursePricing = {
-        '1': { months: 1, tuitionActual: 1200, display: '1 เดือน - 1,200 บาท', nominalFullPrice: 1200, savedAmount: 0 },
-        '2': { months: 2, tuitionActual: 2200, display: '2 เดือน - 2,200 บาท (ประหยัด 200 บาท)', nominalFullPrice: 2400, savedAmount: 200 },
-        '5': { months: 6, tuitionActual: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 },
-        '9': { months: 12, tuitionActual: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 }
-    };
+        // Course pricing (includes 'display' for dropdown and 'nominalFullPrice', 'savedAmount' for internal logic)
+        const coursePricing = {
+            '1': { months: 1, tuitionActual: 1200, display: '1 เดือน - 1,200 บาท', nominalFullPrice: 1200, savedAmount: 0 },
+            '2': { months: 2, tuitionActual: 2200, display: '2 เดือน - 2,200 บาท (ประหยัด 200 บาท)', nominalFullPrice: 2400, savedAmount: 200 },
+            '5': { months: 6, tuitionActual: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 },
+            '9': { months: 12, tuitionActual: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 }
+        };
 
-    // Constants for additional fees
-    const BASE_COURSE_PRICE_PER_MONTH = 1200; // Added for calculating nominal full price if needed
-    const BOOK_PRICE_VAL = 180;
-    const MEMBERSHIP_FEE_VAL = 200;
-    const BAG_PRICE_VAL = 150;
+        // Constants for additional fees
+        const BASE_COURSE_PRICE_PER_MONTH = 1200; // Added for calculating nominal full price if needed
+        const BOOK_PRICE_VAL = 180;
+        const MEMBERSHIP_FEE_VAL = 200;
+        const BAG_PRICE_VAL = 150;
 
-    // Event listeners
-    document.getElementById('courseType').addEventListener('change', updatePricing);
-    document.getElementById('includeBook').addEventListener('change', updatePricing);
-    document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
-    document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
-    document.getElementById('paymentForm').addEventListener('submit', handleFormSubmit);
+        // Event listeners
+        document.getElementById('courseType').addEventListener('change', updatePricing);
+        document.getElementById('includeBook').addEventListener('change', updatePricing);
+        document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
+        document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
+        document.getElementById('paymentForm').addEventListener('submit', handleFormSubmit);
 
-    // Initial call to set up prices on page load
-    updatePricing();
-
-    function handleNewStudentChange() {
-        const isNewStudent = document.getElementById('isNewStudent').checked;
-        const promotionGroup = document.getElementById('promotionGroup');
-
-        if (isNewStudent) {
-            promotionGroup.style.display = 'flex';
-        } else {
-            promotionGroup.style.display = 'none';
-            document.getElementById('newStudentPromotion').checked = false; // Uncheck promo if not new student
-        }
+        // Initial call to set up prices on page load
         updatePricing();
-    }
 
-    function updatePricing() {
-        const courseType = document.getElementById('courseType').value;
-        const includeBook = document.getElementById('includeBook').checked;
-        const isNewStudent = document.getElementById('isNewStudent').checked;
-        const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
+        function handleNewStudentChange() {
+            const isNewStudent = document.getElementById('isNewStudent').checked;
+            const promotionGroup = document.getElementById('promotionGroup');
 
-        let tuitionActualPrice = 0; // ค่าเรียนที่ต้องจ่ายจริงตามโปรโมชั่นคอร์ส (2200, 6000, etc.)
-        let tuitionFullPrice = 0; // ค่าเรียนราคาเต็ม (2400, 7200, 14400)
-        let courseDiscountAmount = 0; // ส่วนลดที่เกิดจากโปรโมชั่นค่าเรียน (200, 1200, 3600)
-        let newStudentPromoDiscount = 0; // ส่วนลดเฉพาะนักเรียนใหม่ (ค่าสมัคร, หนังสือ, กระเป๋า)
-
-        let actualBookFee = 0;
-        let actualMembershipFee = 0;
-        let actualBagFee = 0;
-
-        // 1. Calculate tuition fee based on selected course (includes its built-in discount)
-        const selectedCourse = coursePricing [courseType];
-        if (selectedCourse) {
-            tuitionActualPrice = selectedCourse.tuitionActual;
-            tuitionFullPrice = selectedCourse.nominalFullPrice;
-            courseDiscountAmount = selectedCourse.savedAmount || 0;
-        }
-
-        // 2. Calculate initial additional fees (before new student promo)
-        // These are the fees that would be charged if new student promo is NOT applied
-        if (includeBook) {
-            actualBookFee = BOOK_PRICE_VAL;
-        }
-        if (isNewStudent) { // Only new students might pay for membership/bag
-            actualMembershipFee = MEMBERSHIP_FEE_VAL;
-            actualBagFee = BAG_PRICE_VAL;
-        }
-
-        // 3. Apply new student promotion discount if selected
-        if (isNewStudent && newStudentPromotion) {
-            // Determine how much discount to apply to *these* fees if they are currently charged
-            if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
-            if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
-            if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; // Only if book was selected
-
-            // Set the actual fees to 0 if they are covered by the new student promo
-            actualBookFee = 0;
-            actualMembershipFee = 0;
-            actualBagFee = 0;
-        }
-
-        // Sum up additional fees that are actually charged after all promotions
-        const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
-
-        // Final Total Calculation: tuitionActualPrice is already the discounted course price.
-        // newStudentPromoDiscount correctly only applies to additional fees.
-        const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
-
-        // --- Update Display ---
-        document.getElementById('tuitionFullPrice').textContent = tuitionFullPrice.toLocaleString() + ' บาท'; // Display full price
-
-        // Show/Hide and update Book Fee
-        document.getElementById('bookFeeRow').style.display = actualBookFee > 0 ? 'flex' : 'none';
-        document.getElementById('bookFee').textContent = actualBookFee.toLocaleString() + ' บาท';
-
-        // Show/Hide and update Membership Fee
-        document.getElementById('membershipFeeRow').style.display = actualMembershipFee > 0 ? 'flex' : 'none';
-        document.getElementById('membershipFee').textContent = actualMembershipFee.toLocaleString() + ' บาท';
-
-        // Show/Hide and update Bag Fee
-        document.getElementById('bagFeeRow').style.display = actualBagFee > 0 ? 'flex' : 'none';
-        document.getElementById('bagFee').textContent = actualBagFee.toLocaleString() + ' บาท';
-
-        // Show/Hide and update Course Discount Info
-        document.getElementById('courseDiscountRow').style.display = courseDiscountAmount > 0 ? 'flex' : 'none';
-        document.getElementById('courseDiscount').textContent = '-' + courseDiscountAmount.toLocaleString() + ' บาท';
-
-        // Show/Hide and update New Student Discount
-        document.getElementById('newStudentDiscountRow').style.display = newStudentPromoDiscount > 0 ? 'flex' : 'none';
-        document.getElementById('newStudentDiscount').textContent = '-' + newStudentPromoDiscount.toLocaleString() + ' บาท';
-
-        document.getElementById('totalAmount').textContent = finalTotal.toLocaleString() + ' บาท';
-    }
-
-    function handleFormSubmit(e) {
-        e.preventDefault();
-
-        const studentName = document.getElementById('studentName').value;
-        const phoneNumber = document.getElementById('phoneNumber').value;
-        const courseType = document.getElementById('courseType').value;
-        const includeBook = document.getElementById('includeBook').checked;
-        const isNewStudent = document.getElementById('isNewStudent').checked;
-        const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
-
-        if (!studentName || !phoneNumber || !courseType) {
-            alert('กรุณากรอกข้อมูลให้ครบถ้วน');
-            return;
-        }
-
-        // --- Recalculate everything for paymentData (final values for receipt/sheets) ---
-        let tuitionActualPrice = 0;
-        let tuitionFullPrice = 0;
-        let courseDiscountAmount = 0;
-        let newStudentPromoDiscount = 0;
-
-        let actualBookFee = 0;
-        let actualMembershipFee = 0;
-        let actualBagFee = 0;
-
-        const selectedCourse = coursePricing [courseType];
-        if (selectedCourse) {
-            tuitionActualPrice = selectedCourse.tuitionActual;
-            tuitionFullPrice = selectedCourse.nominalFullPrice;
-            courseDiscountAmount = selectedCourse.savedAmount || 0;
-        }
-
-        if (includeBook) {
-            actualBookFee = BOOK_PRICE_VAL;
-        }
-        if (isNewStudent) {
-            actualMembershipFee = MEMBERSHIP_FEE_VAL;
-            actualBagFee = BAG_PRICE_VAL;
-        }
-
-        if (isNewStudent && newStudentPromotion) {
-            if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
-            if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
-            if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee;
-
-            actualBookFee = 0;
-            actualMembershipFee = 0;
-            actualBagFee = 0;
-        }
-
-        const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
-        const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
-
-        paymentData = {
-            studentName,
-            phoneNumber,
-            courseType,
-            courseName: selectedCourse ? selectedCourse.display : '',
-            tuitionActual: tuitionActualPrice, // Price customer pays for tuition after course promo
-            tuitionFull: tuitionFullPrice, // Full price of tuition before course promo
-            bookFee: actualBookFee,
-            membershipFee: actualMembershipFee,
-            bagFee: actualBagFee,
-            courseDiscount: courseDiscountAmount,
-            newStudentDiscount: newStudentPromoDiscount,
-            total: finalTotal,
-            date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
-            timestamp: new Date().toISOString(),
-            includeBook,
-            isNewStudent,
-            newStudentPromotion
-        };
-
-        showNotification('กำลังบันทึกข้อมูล...', 'info');
-        sendToGoogleSheets(paymentData);
-        showReceipt();
-    }
-
-    function sendToGoogleSheets(data) {
-        const originalBtn = document.querySelector('.btn');
-        originalBtn.style.opacity = '0.7';
-        originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
-
-        // *** IMPORTANT: This URL is now hardcoded as requested ***
-        const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
-
-        const sheetsData = {
-            timestamp: data.timestamp, // Use the ISO string from paymentData
-            studentName: data.studentName,
-            phoneNumber: data.phoneNumber,
-            course: data.courseName,
-            // Sending both full and actual tuition to Sheets for clarity
-            tuitionFull: data.tuitionFull,
-            tuitionActual: data.tuitionActual,
-            bookFee: data.bookFee,
-            membershipFee: data.membershipFee,
-            bagFee: data.bagFee,
-            courseDiscount: data.courseDiscount,
-            newStudentDiscount: data.newStudentDiscount,
-            total: data.total,
-            date: data.date,
-            includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
-            isNewStudent: data.isNewStudent ? 'ใช่' : 'ไม่ใช่',
-            newStudentPromotion: data.newStudentPromotion ? 'ใช่' : 'ไม่ใช่'
-        };
-
-        fetch(webAppUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(sheetsData)
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log('ส่งข้อมูลไป Google Sheets สำเร็จ');
-                showNotification('บันทึกข้อมูลไป Google Sheets สำเร็จ! ✅', 'success');
+            if (isNewStudent) {
+                promotionGroup.style.display = 'flex';
             } else {
-                throw new Error('Network response was not ok');
+                promotionGroup.style.display = 'none';
+                document.getElementById('newStudentPromotion').checked = false; // Uncheck promo if not new student
             }
-        })
-        .catch(error => {
-            console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error);
-            showNotification('บันทึกข้อมูลในระบบเรียบร้อย (มีปัญหาในการส่งไป Sheets) ⚠️', 'error');
-        })
-        .finally(() => {
-            originalBtn.style.opacity = '1';
-            originalBtn.textContent = 'บันทึกการชำระเงิน';
-        });
-    }
+            updatePricing();
+        }
 
-    function showNotification(message, type) {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
+        function updatePricing() {
+            const courseType = document.getElementById('courseType').value;
+            const includeBook = document.getElementById('includeBook').checked;
+            const isNewStudent = document.getElementById('isNewStudent').checked;
+            const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
 
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.addEventListener('transitionend', () => notification.remove());
-        }, 3000);
-    }
+            let tuitionActualPrice = 0; // ค่าเรียนที่ต้องจ่ายจริงตามโปรโมชั่นคอร์ส (2200, 6000, etc.)
+            let tuitionFullPrice = 0; // ค่าเรียนราคาเต็ม (2400, 7200, 14400)
+            let courseDiscountAmount = 0; // ส่วนลดที่เกิดจากโปรโมชั่นค่าเรียน (200, 1200, 3600)
+            let newStudentPromoDiscount = 0; // ส่วนลดเฉพาะนักเรียนใหม่ (ค่าสมัคร, หนังสือ, กระเป๋า)
 
-    function showReceipt() {
-        document.getElementById('formSection').style.display = 'none';
-        document.getElementById('receiptSection').style.display = 'block';
+            let actualBookFee = 0;
+            let actualMembershipFee = 0;
+            let actualBagFee = 0;
 
-        document.getElementById('receiptStudentName').textContent = paymentData.studentName;
-        document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
-        document.getElementById('receiptCourse').textContent = paymentData.courseName;
-        document.getElementById('receiptDate').textContent = paymentData.date;
-
-        const receiptDetailsDiv = document.getElementById('receiptDetails');
-        receiptDetailsDiv.innerHTML = '';
-
-        const addReceiptRow = (label, amount, isDiscount = false, isFullPrice = false) => {
-            if (amount !== 0 || isFullPrice) { // Always show full price tuition, even if 0 for some reason
-                const row = document.createElement('div');
-                row.className = 'receipt-row';
-                row.innerHTML = `
-                    <span>${label}:</span>
-                    <span ${isDiscount ? 'class="discount-text"' : ''}>${amount < 0 ? '-' : ''}${Math.abs(amount).toLocaleString()} บาท</span>
-                `;
-                receiptDetailsDiv.appendChild(row);
+            // 1. Calculate tuition fee based on selected course (includes its built-in discount)
+            const selectedCourse = coursePricing [courseType];
+            if (selectedCourse) {
+                tuitionActualPrice = selectedCourse.tuitionActual;
+                tuitionFullPrice = selectedCourse.nominalFullPrice;
+                courseDiscountAmount = selectedCourse.savedAmount || 0;
             }
-        };
 
-        // Display full tuition price
-        addReceiptRow('ค่าเรียน', paymentData.tuitionFull, false, true);
-        addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
-        addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
-        addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
-        addReceiptRow('ส่วนลด (โปรโมชั่นค่าเรียน)', -paymentData.courseDiscount, true);
-        addReceiptRow('ส่วนลด (นักเรียนใหม่)', -paymentData.newStudentDiscount, true);
+            // 2. Calculate initial additional fees (before new student promo)
+            // These are the fees that would be charged if new student promo is NOT applied
+            if (includeBook) {
+                actualBookFee = BOOK_PRICE_VAL;
+            }
+            if (isNewStudent) { // Only new students might pay for membership/bag
+                actualMembershipFee = MEMBERSHIP_FEE_VAL;
+                actualBagFee = BAG_PRICE_VAL;
+            }
 
-        const totalRow = document.createElement('div');
-        totalRow.className = 'receipt-row total';
-        totalRow.innerHTML = `
-            <span>ยอดรวมสุทธิ:</span>
-            <span>${paymentData.total.toLocaleString()} บาท</span>
-        `;
-        receiptDetailsDiv.appendChild(totalRow);
+            // 3. Apply new student promotion discount if selected
+            if (isNewStudent && newStudentPromotion) {
+                // Determine how much discount to apply to *these* fees if they are currently charged
+                if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
+                if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
+                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; // Only if book was selected
 
-        const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${new Date().toLocaleDateString('th-TH')}`;
-        const qrcodeDiv = document.getElementById('qrcode');
-        qrcodeDiv.innerHTML = '';
-        new QRCode(qrcodeDiv, {
-            text: qrData,
-            width: 150,
-            height: 150,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
+                // Set the actual fees to 0 if they are covered by the new student promo
+                actualBookFee = 0;
+                actualMembershipFee = 0;
+                actualBagFee = 0;
+            }
 
-        // Show the Google Sheet link after the receipt is rendered
-        const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
-        if (googleSheetLinkParagraph) {
-            googleSheetLinkParagraph.style.display = 'block'; // Make sure it's block-level
-        }
-    }
+            // Sum up additional fees that are actually charged after all promotions
+            const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
 
-    function backToForm() {
-        document.getElementById('formSection').style.display = 'block';
-        document.getElementById('receiptSection').style.display = 'none';
-        // Clear form fields and reset state
-        document.getElementById('studentName').value = '';
-        document.getElementById('phoneNumber').value = '';
-        document.getElementById('courseType').value = '';
-        document.getElementById('includeBook').checked = false;
-        document.getElementById('isNewStudent').checked = false;
-        document.getElementById('newStudentPromotion').checked = false;
-        handleNewStudentChange();
-        updatePricing();
+            // Final Total Calculation: tuitionActualPrice is already the discounted course price.
+            // newStudentPromoDiscount correctly only applies to additional fees.
+            const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
 
-        // Optionally hide the Google Sheet link when going back to the form
-        const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
-        if (googleSheetLinkParagraph) {
-            googleSheetLinkParagraph.style.display = 'none';
-        }
-    }
+            // --- Update Display ---
+            document.getElementById('tuitionFullPrice').textContent = tuitionFullPrice.toLocaleString() + ' บาท'; // Display full price
 
-    async function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const receiptElement = document.getElementById('receiptSection');
-        const exportPdfBtn = document.getElementById('exportPdfBtn');
-        const backToFormBtn = document.getElementById('backToFormBtn');
-        const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph'); // Get the link element
+            // Show/Hide and update Book Fee
+            document.getElementById('bookFeeRow').style.display = actualBookFee > 0 ? 'flex' : 'none';
+            document.getElementById('bookFee').textContent = actualBookFee.toLocaleString() + ' บาท';
 
+            // Show/Hide and update Membership Fee
+            document.getElementById('membershipFeeRow').style.display = actualMembershipFee > 0 ? 'flex' : 'none';
+            document.getElementById('membershipFee').textContent = actualMembershipFee.toLocaleString() + ' บาท';
 
-        // Store original body styles
-        const originalBodyOverflow = document.body.style.overflow;
-        const originalBodyMargin = document.body.style.margin;
+            // Show/Hide and update Bag Fee
+            document.getElementById('bagFeeRow').style.display = actualBagFee > 0 ? 'flex' : 'none';
+            document.getElementById('bagFee').textContent = actualBagFee.toLocaleString() + ' บาท';
 
-        // Store original receipt styles
-        const originalReceiptDisplay = receiptElement.style.display;
-        const originalReceiptPosition = receiptElement.style.position;
-        const originalReceiptTop = receiptElement.style.top;
-        const originalReceiptLeft = receiptElement.style.left;
-        const originalReceiptOpacity = receiptElement.style.opacity;
-        const originalReceiptVisibility = receiptElement.style.visibility;
-        const originalReceiptPointerEvents = receiptElement.style.pointerEvents;
-        const originalReceiptZIndex = receiptElement.style.zIndex;
-        const originalReceiptWidth = receiptElement.style.width;
-        const originalReceiptMaxWidth = receiptElement.style.maxWidth;
-        const originalReceiptPadding = receiptElement.style.padding;
-        const originalReceiptBoxSizing = receiptElement.style.boxSizing;
-        const originalReceiptTransform = receiptElement.style.transform;
+            // Show/Hide and update Course Discount Info
+            document.getElementById('courseDiscountRow').style.display = courseDiscountAmount > 0 ? 'flex' : 'none';
+            document.getElementById('courseDiscount').textContent = '-' + courseDiscountAmount.toLocaleString() + ' บาท';
 
-        // --- START Temporary adjustments for PDF capture ---
-        // Hide buttons and the Google Sheet link from html2canvas capture
-        exportPdfBtn.classList.add('hide-on-pdf');
-        backToFormBtn.classList.add('hide-on-pdf');
-        if (googleSheetLinkParagraph) { // Ensure the element exists before trying to hide it
-            googleSheetLinkParagraph.classList.add('hide-on-pdf');
+            // Show/Hide and update New Student Discount
+            document.getElementById('newStudentDiscountRow').style.display = newStudentPromoDiscount > 0 ? 'flex' : 'none';
+            document.getElementById('newStudentDiscount').textContent = '-' + newStudentPromoDiscount.toLocaleString() + ' บาท';
+
+            document.getElementById('totalAmount').textContent = finalTotal.toLocaleString() + ' บาท';
         }
 
+        function handleFormSubmit(e) {
+            e.preventDefault();
 
-        // Temporarily adjust body for full content capture
-        document.body.style.overflow = 'hidden'; // Prevent scrollbars during capture
-        document.body.style.margin = '0'; // Remove any margin that might affect capture position
+            const studentName = document.getElementById('studentName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const courseType = document.getElementById('courseType').value;
+            const includeBook = document.getElementById('includeBook').checked;
+            const isNewStudent = document.getElementById('isNewStudent').checked;
+            const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
 
-        // Make the receipt element display and visible, but off-screen for capture
-        receiptElement.style.display = 'block';
-        receiptElement.style.position = 'absolute';
-        receiptElement.style.top = '0'; // Position at top left of document
-        receiptElement.style.left = '-9999px'; // Move off-screen
-        receiptElement.style.opacity = '1'; // Must be opaque to capture content
-        receiptElement.style.visibility = 'visible'; // Must be visible
-        receiptElement.style.pointerEvents = 'none'; // Disable interactions
-        receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
+            if (!studentName || !phoneNumber || !courseType) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
 
-        // Set fixed width and padding for consistent rendering, matching A4 aspect
-        receiptElement.style.width = '794px'; // A4 width in pixels at 96 DPI
-        receiptElement.style.maxWidth = '794px';
-        receiptElement.style.padding = '75.5px'; // Standard A4 margins in pixels, adjust if needed
-        receiptElement.style.boxSizing = 'border-box'; // Ensure padding is included in width/height
-        receiptElement.style.transform = 'none'; // Clear any transforms
+            // --- Recalculate everything for paymentData (final values for receipt/sheets) ---
+            let tuitionActualPrice = 0;
+            let tuitionFullPrice = 0;
+            let courseDiscountAmount = 0;
+            let newStudentPromoDiscount = 0;
 
+            let actualBookFee = 0;
+            let actualMembershipFee = 0;
+            let actualBagFee = 0;
 
-        // Add a small delay to ensure rendering is complete before capture
-        await new Promise(resolve => setTimeout(resolve, 100)); // Increased delay for more stability
+            const selectedCourse = coursePricing [courseType];
+            if (selectedCourse) {
+                tuitionActualPrice = selectedCourse.tuitionActual;
+                tuitionFullPrice = selectedCourse.type.nominalFullPrice; // Fixed: Use nominalFullPrice from selectedCourse
+                courseDiscountAmount = selectedCourse.savedAmount || 0;
+            }
 
-        try {
-            const canvas = await html2canvas(receiptElement, {
-                scale: 4, // เพิ่ม scale เป็น 4 เพื่อความละเอียดที่สูงขึ้นไปอีก
-                useCORS: true,
-                logging: false // Disable logging for cleaner console in production, can set to true for debug
+            if (includeBook) {
+                actualBookFee = BOOK_PRICE_VAL;
+            }
+            if (isNewStudent) {
+                actualMembershipFee = MEMBERSHIP_FEE_VAL;
+                actualBagFee = BAG_PRICE_VAL;
+            }
+
+            if (isNewStudent && newStudentPromotion) {
+                if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
+                if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
+                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee;
+
+                actualBookFee = 0;
+                actualMembershipFee = 0;
+                actualBagFee = 0;
+            }
+
+            const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
+            const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
+
+            paymentData = {
+                studentName,
+                phoneNumber,
+                courseType,
+                courseName: selectedCourse ? selectedCourse.display : '',
+                tuitionActual: tuitionActualPrice, // Price customer pays for tuition after course promo
+                tuitionFull: tuitionFullPrice, // Full price of tuition before course promo
+                bookFee: actualBookFee,
+                membershipFee: actualMembershipFee,
+                bagFee: actualBagFee,
+                courseDiscount: courseDiscountAmount,
+                newStudentDiscount: newStudentPromoDiscount,
+                total: finalTotal,
+                date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
+                timestamp: new Date().toISOString(),
+                includeBook,
+                isNewStudent,
+                newStudentPromotion
+            };
+
+            showNotification('กำลังบันทึกข้อมูล...', 'info');
+            sendToGoogleSheets(paymentData);
+            showReceipt();
+        }
+
+        function sendToGoogleSheets(data) {
+            const originalBtn = document.querySelector('.btn');
+            originalBtn.style.opacity = '0.7';
+            originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
+
+            // *** IMPORTANT: This URL is now hardcoded as requested ***
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
+
+            const sheetsData = {
+                timestamp: data.timestamp, // Use the ISO string from paymentData
+                studentName: data.studentName,
+                phoneNumber: data.phoneNumber,
+                course: data.courseName,
+                // Sending both full and actual tuition to Sheets for clarity
+                tuitionFull: data.tuitionFull,
+                tuitionActual: data.tuitionActual,
+                bookFee: data.bookFee,
+                membershipFee: data.membershipFee,
+                bagFee: data.bagFee,
+                courseDiscount: data.courseDiscount,
+                newStudentDiscount: data.newStudentDiscount,
+                total: data.total,
+                date: data.date,
+                includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
+                isNewStudent: data.isNewStudent ? 'ใช่' : 'ไม่ใช่',
+                newStudentPromotion: data.newStudentPromotion ? 'ใช่' : 'ไม่ใช่'
+            };
+
+            fetch(webAppUrl, {
+                method: 'POST',
+                // Change Content-Type to text/plain to avoid preflight issues with some Apps Script deployments
+                headers: {
+                    'Content-Type': 'text/plain', 
+                },
+                body: JSON.stringify(sheetsData) // Still send JSON string in body
+            })
+            .then(response => {
+                if (response.ok) { // Check if HTTP status is 2xx
+                    return response.text(); // Read response as text
+                } else {
+                    // If response is not ok, throw an error with more details
+                    return response.text().then(text => { throw new Error(text || response.statusText); });
+                }
+            })
+            .then(responseText => {
+                // Apps Script text output doesn't need to be parsed as JSON, just log
+                console.log('ส่งข้อมูลไป Google Sheets สำเร็จ:', responseText);
+                showNotification('บันทึกข้อมูลไป Google Sheets สำเร็จ! ✅', 'success');
+            })
+            .catch(error => {
+                console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error);
+                showNotification('บันทึกข้อมูลในระบบเรียบร้อย (มีปัญหาในการส่งไป Sheets) ⚠️ (โปรดตรวจสอบ Console)', 'error');
+            })
+            .finally(() => {
+                originalBtn.style.opacity = '1';
+                originalBtn.textContent = 'บันทึกการชำระเงิน';
             });
+        }
 
-            // For debugging: open the captured image in a new tab
-            // const imgDebug = canvas.toDataURL('image/png');
-            // window.open(imgDebug);
-            // console.log("html2canvas captured image data length:", imgDebug.length);
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
 
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.addEventListener('transitionend', () => notification.remove());
+            }, 3000);
+        }
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
+        function showReceipt() {
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('receiptSection').style.display = 'block';
 
-            const pdfWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
-            const pdfHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
-            const imgHeightScaled = canvas.height * pdfWidth / canvas.width; // Calculate image height to fit PDF width
+            document.getElementById('receiptStudentName').textContent = paymentData.studentName;
+            document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
+            document.getElementById('receiptCourse').textContent = paymentData.courseName;
+            document.getElementById('receiptDate').textContent = paymentData.date;
 
-            // Add image to PDF. Only add one page as requested.
-            // If content is too long for one page, it will be cut off.
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeightScaled);
+            const receiptDetailsDiv = document.getElementById('receiptDetails');
+            receiptDetailsDiv.innerHTML = '';
 
-            pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
+            const addReceiptRow = (label, amount, isDiscount = false, isFullPrice = false) => {
+                if (amount !== 0 || isFullPrice) { // Always show full price tuition, even if 0 for some reason
+                    const row = document.createElement('div');
+                    row.className = 'receipt-row';
+                    row.innerHTML = `
+                        <span>${label}:</span>
+                        <span ${isDiscount ? 'class="discount-text"' : ''}>${amount < 0 ? '-' : ''}${Math.abs(amount).toLocaleString()} บาท</span>
+                    `;
+                    receiptDetailsDiv.appendChild(row);
+                }
+            };
 
-        } catch (error) {
-            console.error("Error during PDF generation:", error);
-            alert("เกิดข้อผิดพลาดในการสร้าง PDF: " + error.message);
-        } finally {
-            // --- END Temporary adjustments for PDF capture ---
-            // Restore original styles after PDF generation
+            // Display full tuition price
+            addReceiptRow('ค่าเรียน', paymentData.tuitionFull, false, true);
+            addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
+            addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
+            addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
+            addReceiptRow('ส่วนลด (โปรโมชั่นค่าเรียน)', -paymentData.courseDiscount, true);
+            addReceiptRow('ส่วนลด (นักเรียนใหม่)', -paymentData.newStudentDiscount, true);
 
-            // Restore button and Google Sheet link visibility
-            exportPdfBtn.classList.remove('hide-on-pdf');
-            backToFormBtn.classList.remove('hide-on-pdf');
+            const totalRow = document.createElement('div');
+            totalRow.className = 'receipt-row total';
+            totalRow.innerHTML = `
+                <span>ยอดรวมสุทธิ:</span>
+                <span>${paymentData.total.toLocaleString()} บาท</span>
+            `;
+            receiptDetailsDiv.appendChild(totalRow);
+
+            // Re-instantiate QRCode for qrcode.js library
+            const qrCodeDiv = document.getElementById('qrcode');
+            qrCodeDiv.innerHTML = ''; // Clear previous QR code
+            const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${new Date().toLocaleDateString('th-TH')}`;
+            new QRCode(qrCodeDiv, {
+                text: qrData,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            // Show the Google Sheet link after the receipt is rendered
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
             if (googleSheetLinkParagraph) {
-                googleSheetLinkParagraph.classList.remove('hide-on-pdf');
-                // Ensure it's explicitly shown on the receipt page after PDF export
-                googleSheetLinkParagraph.style.display = 'block';
+                googleSheetLinkParagraph.style.display = 'block'; // Make sure it's block-level
+            }
+        }
+
+        function backToForm() {
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('receiptSection').style.display = 'none';
+            // Clear form fields and reset state
+            document.getElementById('studentName').value = '';
+            document.getElementById('phoneNumber').value = '';
+            document.getElementById('courseType').value = '';
+            document.getElementById('includeBook').checked = false;
+            document.getElementById('isNewStudent').checked = false;
+            document.getElementById('newStudentPromotion').checked = false;
+            handleNewStudentChange();
+            updatePricing();
+            
+            // Optionally hide the Google Sheet link when going back to the form
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
+            if (googleSheetLinkParagraph) {
+                googleSheetLinkParagraph.style.display = 'none';
+            }
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const receiptElement = document.getElementById('receiptSection');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            const backToFormBtn = document.getElementById('backToFormBtn');
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph'); // Get the link element
+
+
+            // Store original body styles
+            const originalBodyOverflow = document.body.style.overflow;
+            const originalBodyMargin = document.body.style.margin;
+
+            // Store original receipt styles
+            const originalReceiptDisplay = receiptElement.style.display;
+            const originalReceiptPosition = receiptElement.style.position;
+            const originalReceiptTop = receiptElement.style.top;
+            const originalReceiptLeft = receiptElement.style.left;
+            const originalReceiptOpacity = receiptElement.style.opacity;
+            const originalReceiptVisibility = receiptElement.style.visibility;
+            const originalReceiptPointerEvents = receiptElement.style.pointerEvents;
+            const originalReceiptZIndex = receiptElement.style.zIndex;
+            const originalReceiptWidth = receiptElement.style.width;
+            const originalReceiptMaxWidth = receiptElement.style.maxWidth;
+            const originalReceiptPadding = receiptElement.style.padding;
+            const originalReceiptBoxSizing = receiptElement.style.boxSizing;
+            const originalReceiptTransform = receiptElement.style.transform;
+
+            // --- START Temporary adjustments for PDF capture ---
+            // Hide buttons and the Google Sheet link from html2canvas capture
+            exportPdfBtn.classList.add('hide-on-pdf');
+            backToFormBtn.classList.add('hide-on-pdf');
+            if (googleSheetLinkParagraph) { // Ensure the element exists before trying to hide it
+                googleSheetLinkParagraph.classList.add('hide-on-pdf');
             }
 
-            document.body.style.overflow = originalBodyOverflow;
-            document.body.style.margin = originalBodyMargin;
 
-            receiptElement.style.display = originalReceiptDisplay;
-            receiptElement.style.position = originalReceiptPosition;
-            receiptElement.style.top = originalReceiptTop;
-            receiptElement.style.left = originalReceiptLeft;
-            receiptElement.style.opacity = originalReceiptOpacity;
-            receiptElement.style.visibility = originalReceiptVisibility;
-            receiptElement.style.pointerEvents = originalReceiptPointerEvents;
-            receiptElement.style.zIndex = originalReceiptZIndex;
-            receiptElement.style.width = originalReceiptWidth;
-            receiptElement.style.maxWidth = originalReceiptMaxWidth;
-            receiptElement.style.padding = originalReceiptPadding;
-            receiptElement.style.boxSizing = originalReceiptBoxSizing;
-            receiptElement.style.transform = originalReceiptTransform;
+            // Temporarily adjust body for full content capture
+            document.body.style.overflow = 'hidden'; // Prevent scrollbars during capture
+            document.body.style.margin = '0'; // Remove any margin that might affect capture position
+
+            // Make the receipt element display and visible, but off-screen for capture
+            receiptElement.style.display = 'block';
+            receiptElement.style.position = 'absolute';
+            receiptElement.style.top = '0'; // Position at top left of document
+            receiptElement.style.left = '-9999px'; // Move off-screen
+            receiptElement.style.opacity = '1'; // Must be opaque to capture content
+            receiptElement.style.visibility = 'visible'; // Must be visible
+            receiptElement.style.pointerEvents = 'none'; // Disable interactions
+            receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
+
+            // Set fixed width and padding for consistent rendering, matching A4 aspect
+            receiptElement.style.width = '794px'; // A4 width in pixels at 96 DPI
+            receiptElement.style.maxWidth = '794px';
+            receiptElement.style.padding = '75.5px'; // Standard A4 margins in pixels, adjust if needed
+            receiptElement.style.boxSizing = 'border-box'; // Ensure padding is included in width/height
+            receiptElement.style.transform = 'none'; // Clear any transforms
+
+
+            // Add a small delay to ensure rendering is complete before capture
+            await new Promise(resolve => setTimeout(resolve, 100)); // Increased delay for more stability
+
+            try {
+                const canvas = await html2canvas(receiptElement, {
+                    scale: 4, // เพิ่ม scale เป็น 4 เพื่อความละเอียดที่สูงขึ้นไปอีก (สำหรับโลโก้)
+                    useCORS: true,
+                    logging: false // Disable logging for cleaner console in production, can set to true for debug
+                });
+
+                // For debugging: open the captured image in a new tab
+                // const imgDebug = canvas.toDataURL('image/png');
+                // window.open(imgDebug);
+                // console.log("html2canvas captured image data length:", imgDebug.length);
+
+
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
+
+                const pdfWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
+                const pdfHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
+                const imgHeightScaled = canvas.height * pdfWidth / canvas.width; // Calculate image height to fit PDF width
+
+                // Add image to PDF. Only add one page as requested.
+                // If content is too long for one page, it will be cut off.
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeightScaled);
+
+                pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
+
+            } catch (error) {
+                console.error("Error during PDF generation:", error);
+                alert("เกิดข้อผิดพลาดในการสร้าง PDF: " + error.message);
+            } finally {
+                // --- END Temporary adjustments for PDF capture ---
+                // Restore original styles after PDF generation
+
+                // Restore button and Google Sheet link visibility
+                exportPdfBtn.classList.remove('hide-on-pdf');
+                backToFormBtn.classList.remove('hide-on-pdf');
+                if (googleSheetLinkParagraph) {
+                    googleSheetLinkParagraph.classList.remove('hide-on-pdf');
+                    // Ensure it's explicitly shown on the receipt page after PDF export
+                    googleSheetLinkParagraph.style.display = 'block';
+                }
+
+                document.body.style.overflow = originalBodyOverflow;
+                document.body.style.margin = originalBodyMargin;
+
+                receiptElement.style.display = originalReceiptDisplay;
+                receiptElement.style.position = originalReceiptPosition;
+                receiptElement.style.top = originalReceiptTop;
+                receiptElement.style.left = originalReceiptLeft;
+                receiptElement.style.opacity = originalReceiptOpacity;
+                receiptElement.style.visibility = originalReceiptVisibility;
+                receiptElement.style.pointerEvents = originalReceiptPointerEvents;
+                receiptElement.style.zIndex = originalReceiptZIndex;
+                receiptElement.style.width = originalReceiptWidth;
+                receiptElement.style.maxWidth = originalReceiptMaxWidth;
+                receiptElement.style.padding = originalReceiptPadding;
+                receiptElement.style.boxSizing = originalReceiptBoxSizing;
+                receiptElement.style.transform = originalReceiptTransform;
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
