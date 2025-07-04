@@ -62,7 +62,7 @@
             font-weight: bold;
             color: #4facfe;
             /* Using a real image for logo */
-            background-image: url('logo.png'); /* Ensure logo.png is in the same directory */
+            background-image: url('./logo.png'); /* *** PATH ADJUSMENT: Use ./ for current directory *** */
             background-size: cover;
             background-position: center;
             border: 2px solid #fff;
@@ -221,7 +221,7 @@
         .receipt-logo {
             width: 80px;
             height: 80px;
-            background-image: url('logo.png'); /* Ensure logo.png is in the same directory */
+            background-image: url('./logo.png'); /* *** PATH ADJUSMENT: Use ./ for current directory *** */
             background-size: cover;
             background-position: center;
             border-radius: 50%;
@@ -312,3 +312,565 @@
             border-radius: 10px;
             color: white;
             font-weight: 500;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #333;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            body {
+                padding: 0;
+                align-items: stretch; /* Stretch to fill viewport height */
+            }
+            .container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+                box-shadow: none;
+            }
+            .form-container, .receipt {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .header p {
+                font-size: 13px;
+            }
+            .btn {
+                font-size: 16px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo"></div>
+            <h1>โรงเรียนเลอวองจินตคณิต</h1>
+            <p>ระบบชำระเงินค่าเรียน</p>
+        </div>
+
+        <div id="formSection" class="form-container">
+            <div style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #4facfe;">
+                <h3 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">📊 การเชื่อมต่อ Google Sheets</h3>
+                <div style="background: #e8f4f8; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                    <p style="margin: 0; font-size: 12px; color: #666;">
+                        <strong>ระบบจะบันทึกข้อมูลลงใน Google Sheets อัตโนมัติ</strong><br>
+                        📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?usp=sharing" target="_blank" style="color: #4facfe;">Google Sheets (ตัวอย่าง)</a>
+                        <br>
+                        <em>กรุณาแก้ไข URL ในโค้ด JavaScript ด้วย Web App URL ของคุณเอง</em>
+                    </p>
+                </div>
+            </div>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="studentName">ชื่อนักเรียน</label>
+                    <input type="text" id="studentName" name="studentName" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneNumber">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" required pattern="[0-9]{10}" title="กรุณากรอกเบอร์โทรศัพท์ 10 หลัก">
+                </div>
+
+                <div class="form-group">
+                    <label for="courseType">คอร์ส/จำนวนเดือน</label>
+                    <select id="courseType" name="courseType" required>
+                        <option value="">เลือกคอร์ส</option>
+                        <option value="1">1 เดือน - 1,200 บาท</option>
+                        <option value="2">2 เดือน - 2,200 บาท (ประหยัด 200 บาท)</option>
+                        <option value="5">5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)</option>
+                        <option value="9">9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="includeBook" name="includeBook">
+                    <label for="includeBook">ค่าหนังสือเรียน 180 บาท</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isNewStudent" name="isNewStudent">
+                    <label for="isNewStudent">นักเรียนสมัครใหม่</label>
+                </div>
+
+                <div class="checkbox-group" id="promotionGroup" style="display: none;">
+                    <input type="checkbox" id="newStudentPromotion" name="newStudentPromotion">
+                    <label for="newStudentPromotion">ใช้โปรโมชั่นนักเรียนใหม่ (ฟรีค่าสมัคร, ฟรีหนังสือ 1 เล่ม, ฟรีค่ากระเป๋า)</label>
+                </div>
+
+                <div class="price-display">
+                    <div class="price-row">
+                        <span>ค่าเรียน:</span>
+                        <span id="tuitionFee">0 บาท</span>
+                    </div>
+                    <div class="price-row" id="bookFeeRow" style="display: none;">
+                        <span>ค่าหนังสือ:</span>
+                        <span id="bookFee">180 บาท</span>
+                    </div>
+                    <div class="price-row" id="membershipFeeRow" style="display: none;">
+                        <span>ค่าสมาชิกแรกเข้า:</span>
+                        <span id="membershipFee">200 บาท</span>
+                    </div>
+                    <div class="price-row" id="bagFeeRow" style="display: none;">
+                        <span>ค่ากระเป๋า:</span>
+                        <span id="bagFee">150 บาท</span>
+                    </div>
+                    <div class="price-row" id="discountRow" style="display: none;">
+                        <span>ส่วนลด (โปรโมชั่นค่าเรียน):</span>
+                        <span id="discount" class="discount-text">-0 บาท</span>
+                    </div>
+                    <div class="price-row" id="newStudentDiscountRow" style="display: none;">
+                        <span>ส่วนลด (นักเรียนใหม่):</span>
+                        <span id="newStudentDiscount" class="discount-text">-0 บาท</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>ยอดรวมสุทธิ:</span>
+                        <span id="totalAmount">0 บาท</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">บันทึกการชำระเงิน</button>
+            </form>
+        </div>
+
+        <div id="receiptSection" class="receipt">
+            <div class="receipt-header">
+                <div class="receipt-logo"></div>
+                <div class="receipt-title">โรงเรียนเลอวองจินตคณิต</div>
+                <div class="receipt-subtitle">ใบเสร็จรับเงิน</div>
+            </div>
+
+            <div class="receipt-info">
+                <div class="receipt-row">
+                    <span>ชื่อนักเรียน:</span>
+                    <span id="receiptStudentName"></span>
+                </div>
+                <div class="receipt-row">
+                    <span>เบอร์โทรศัพท์:</span>
+                    <span id="receiptPhoneNumber"></span>
+                </div>
+                <div class="receipt-row">
+                    <span>คอร์ส:</span>
+                    <span id="receiptCourse"></span>
+                </div>
+                <div class="receipt-row">
+                    <span>วันที่:</span>
+                    <span id="receiptDate"></span>
+                </div>
+            </div>
+
+            <div id="receiptDetails">
+                </div>
+
+            <div class="qr-section">
+                <div id="qrcode"></div>
+                <p style="margin-top: 10px; font-size: 13px; color: #666;">สแกนเพื่อตรวจสอบใบเสร็จ</p>
+            </div>
+
+            <div class="signature-section">
+                <div>ผู้รับเงิน</div>
+                <div class="signature-line"></div>
+                <div style="font-size: 13px; margin-top: 5px;">(.............................)</div>
+            </div>
+
+            <div class="receipt-footer">
+                <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
+                <p>โรงเรียนเลอวองจินตคณิต</p>
+            </div>
+
+            <button class="btn export-btn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
+            <button class="btn back-btn" onclick="backToForm()">กลับหน้าแรก</button>
+        </div>
+    </div>
+
+    <script>
+        let paymentData = {};
+
+        // Course pricing (courseNameDisplay added for better receipt description)
+        const coursePricing = {
+            '1': { months: 1, price: 1200, discount: 0, courseNameDisplay: '1 เดือน' },
+            '2': { months: 2, price: 2200, discount: 200, courseNameDisplay: '2 เดือน (ประหยัด 200 บาท)' },
+            '5': { months: 6, price: 6000, discount: 1200, courseNameDisplay: '5 เดือน (ได้เรียน 6 เดือน)' },
+            '9': { months: 12, price: 10800, discount: 3600, courseNameDisplay: '9 เดือน (ได้เรียน 12 เดือน)' }
+        };
+
+        // Constants for additional fees
+        const BOOK_PRICE_VAL = 180;
+        const MEMBERSHIP_FEE_VAL = 200;
+        const BAG_PRICE_VAL = 150;
+
+        // Event listeners
+        document.getElementById('courseType').addEventListener('change', updatePricing);
+        document.getElementById('includeBook').addEventListener('change', updatePricing);
+        document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
+        document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
+        document.getElementById('paymentForm').addEventListener('submit', handleFormSubmit);
+
+        // Initial call to set up prices on page load
+        updatePricing();
+
+        function handleNewStudentChange() {
+            const isNewStudent = document.getElementById('isNewStudent').checked;
+            const promotionGroup = document.getElementById('promotionGroup');
+
+            if (isNewStudent) {
+                promotionGroup.style.display = 'flex';
+            } else {
+                promotionGroup.style.display = 'none';
+                document.getElementById('newStudentPromotion').checked = false; // Uncheck promo if not new student
+            }
+            updatePricing();
+        }
+
+        function updatePricing() {
+            const courseType = document.getElementById('courseType').value;
+            const includeBook = document.getElementById('includeBook').checked;
+            const isNewStudent = document.getElementById('isNewStudent').checked;
+            const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
+
+            let tuitionFee = 0;
+            let courseDiscount = 0; // Discount from course selection (2, 5, 9 months)
+            let newStudentPromoDiscount = 0; // Discount from new student promotion
+
+            let actualBookFee = 0;
+            let actualMembershipFee = 0;
+            let actualBagFee = 0;
+
+            // 1. Calculate tuition fee and course discount
+            const selectedCourse = coursePricing[courseType];
+            if (selectedCourse) {
+                tuitionFee = selectedCourse.price;
+                courseDiscount = selectedCourse.discount;
+            }
+
+            // 2. Calculate initial additional fees (before new student promo)
+            if (includeBook) {
+                actualBookFee = BOOK_PRICE_VAL;
+            }
+            // Membership and bag are only applicable if student is new AND not using new student promo
+            if (isNewStudent && !newStudentPromotion) { // Only if new student AND NOT using new student promo
+                actualMembershipFee = MEMBERSHIP_FEE_VAL;
+                actualBagFee = BAG_PRICE_VAL;
+            }
+
+
+            // 3. Apply new student promotion discount
+            if (isNewStudent && newStudentPromotion) {
+                newStudentPromoDiscount += MEMBERSHIP_FEE_VAL; // Free enrollment
+                newStudentPromoDiscount += BAG_PRICE_VAL;     // Free bag
+                
+                // If book was selected, it's also free
+                if (includeBook) {
+                    newStudentPromoDiscount += BOOK_PRICE_VAL; // Free book
+                    actualBookFee = 0; // Set to 0 for display and final calculation
+                }
+                actualMembershipFee = 0; // Set to 0 for display and final calculation
+                actualBagFee = 0;      // Set to 0 for display and final calculation
+            }
+            
+            // Total additional fees that are actually charged
+            const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
+
+            // Final Total Calculation
+            const finalTotal = tuitionFee + totalAdditionalFeesCharged - courseDiscount - newStudentPromoDiscount;
+
+            // --- Update Display ---
+            document.getElementById('tuitionFee').textContent = tuitionFee.toLocaleString() + ' บาท';
+
+            // Show/Hide and update Book Fee
+            document.getElementById('bookFeeRow').style.display = actualBookFee > 0 ? 'flex' : 'none';
+            document.getElementById('bookFee').textContent = actualBookFee.toLocaleString() + ' บาท';
+
+            // Show/Hide and update Membership Fee
+            document.getElementById('membershipFeeRow').style.display = actualMembershipFee > 0 ? 'flex' : 'none';
+            document.getElementById('membershipFee').textContent = actualMembershipFee.toLocaleString() + ' บาท';
+
+            // Show/Hide and update Bag Fee
+            document.getElementById('bagFeeRow').style.display = actualBagFee > 0 ? 'flex' : 'none';
+            document.getElementById('bagFee').textContent = actualBagFee.toLocaleString() + ' บาท';
+
+            // Show/Hide and update Course Discount
+            document.getElementById('discountRow').style.display = courseDiscount > 0 ? 'flex' : 'none';
+            document.getElementById('discount').textContent = '-' + courseDiscount.toLocaleString() + ' บาท';
+
+            // Show/Hide and update New Student Discount
+            document.getElementById('newStudentDiscountRow').style.display = newStudentPromoDiscount > 0 ? 'flex' : 'none';
+            document.getElementById('newStudentDiscount').textContent = '-' + newStudentPromoDiscount.toLocaleString() + ' บาท';
+
+            document.getElementById('totalAmount').textContent = finalTotal.toLocaleString() + ' บาท';
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const studentName = document.getElementById('studentName').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const courseType = document.getElementById('courseType').value;
+            const includeBook = document.getElementById('includeBook').checked;
+            const isNewStudent = document.getElementById('isNewStudent').checked;
+            const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
+
+            if (!studentName || !phoneNumber || !courseType) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            // --- Recalculate everything for paymentData (final values) ---
+            let tuitionFee = 0;
+            let courseDiscount = 0;
+            let newStudentPromoDiscount = 0;
+
+            let actualBookFee = 0;
+            let actualMembershipFee = 0;
+            let actualBagFee = 0;
+            
+            const selectedCourse = coursePricing[courseType];
+            if (selectedCourse) {
+                tuitionFee = selectedCourse.price;
+                courseDiscount = selectedCourse.discount;
+            }
+
+            if (includeBook) {
+                actualBookFee = BOOK_PRICE_VAL;
+            }
+            if (isNewStudent && !newStudentPromotion) {
+                actualMembershipFee = MEMBERSHIP_FEE_VAL;
+                actualBagFee = BAG_PRICE_VAL;
+            }
+
+            if (isNewStudent && newStudentPromotion) {
+                newStudentPromoDiscount += MEMBERSHIP_FEE_VAL;
+                newStudentPromoDiscount += BAG_PRICE_VAL;
+                if (includeBook) {
+                    newStudentPromoDiscount += BOOK_PRICE_VAL;
+                }
+                actualBookFee = 0;
+                actualMembershipFee = 0;
+                actualBagFee = 0;
+            }
+            
+            const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
+            const finalTotal = tuitionFee + totalAdditionalFeesCharged - courseDiscount - newStudentPromoDiscount;
+
+            paymentData = {
+                studentName,
+                phoneNumber,
+                courseType,
+                courseName: selectedCourse ? selectedCourse.courseNameDisplay : '',
+                tuitionFee: tuitionFee, // ค่าเรียนตามโปรโมชั่นเดือน
+                bookFee: actualBookFee,
+                membershipFee: actualMembershipFee,
+                bagFee: actualBagFee,
+                courseDiscount: courseDiscount,
+                newStudentDiscount: newStudentPromoDiscount,
+                total: finalTotal,
+                date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
+                timestamp: new Date().toISOString(), // เพิ่ม timestamp เพื่อบันทึกเวลาที่แน่นอน
+                includeBook,
+                isNewStudent,
+                newStudentPromotion
+            };
+            
+            showNotification('กำลังบันทึกข้อมูล...', 'info');
+            sendToGoogleSheets(paymentData);
+            showReceipt();
+        }
+
+        function sendToGoogleSheets(data) {
+            const originalBtn = document.querySelector('.btn');
+            originalBtn.style.opacity = '0.7';
+            originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
+
+            // *** IMPORTANT: Replace with your actual Google Apps Script Web App URL ***
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbzcpPpfhByzXC_JYiItzBWpZmYV_PbZxJtOU0_m7A7NMM8uffuVucxLCn7xeJ_evoGS/exec'; 
+
+            const sheetsData = {
+                timestamp: new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }),
+                studentName: data.studentName,
+                phoneNumber: data.phoneNumber,
+                course: data.courseName,
+                tuitionFee: data.tuitionFee,
+                bookFee: data.bookFee,
+                membershipFee: data.membershipFee,
+                bagFee: data.bagFee,
+                courseDiscount: data.courseDiscount, // แยกส่วนลดค่าเรียน
+                newStudentDiscount: data.newStudentDiscount, // แยกส่วนลดนักเรียนใหม่
+                total: data.total,
+                date: data.date,
+                includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
+                isNewStudent: data.isNewStudent ? 'ใช่' : 'ไม่ใช่',
+                newStudentPromotion: data.newStudentPromotion ? 'ใช่' : 'ไม่ใช่'
+            };
+
+            fetch(webAppUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(sheetsData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('ส่งข้อมูลไป Google Sheets สำเร็จ');
+                    showNotification('บันทึกข้อมูลไป Google Sheets สำเร็จ! ✅', 'success');
+                } else {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error);
+                showNotification('บันทึกข้อมูลในระบบเรียบร้อย (มีปัญหาในการส่งไป Sheets)⚠️', 'error');
+            })
+            .finally(() => {
+                originalBtn.style.opacity = '1';
+                originalBtn.textContent = 'บันทึกการชำระเงิน';
+            });
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.addEventListener('transitionend', () => notification.remove());
+            }, 3000);
+        }
+
+        function showReceipt() {
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('receiptSection').style.display = 'block';
+
+            document.getElementById('receiptStudentName').textContent = paymentData.studentName;
+            document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
+            document.getElementById('receiptCourse').textContent = paymentData.courseName;
+            document.getElementById('receiptDate').textContent = paymentData.date;
+
+            const receiptDetailsDiv = document.getElementById('receiptDetails');
+            receiptDetailsDiv.innerHTML = '';
+
+            const addReceiptRow = (label, amount, isDiscount = false) => {
+                if (amount !== 0) {
+                    const row = document.createElement('div');
+                    row.className = 'receipt-row';
+                    row.innerHTML = `
+                        <span>${label}:</span>
+                        <span ${isDiscount ? 'class="discount-text"' : ''}>${amount < 0 ? '-' : ''}${Math.abs(amount).toLocaleString()} บาท</span>
+                    `;
+                    receiptDetailsDiv.appendChild(row);
+                }
+            };
+
+            addReceiptRow('ค่าเรียน', paymentData.tuitionFee);
+            addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
+            addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
+            addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
+            addReceiptRow('ส่วนลด (โปรโมชั่นค่าเรียน)', -paymentData.courseDiscount, true);
+            addReceiptRow('ส่วนลด (นักเรียนใหม่)', -paymentData.newStudentDiscount, true);
+
+            const totalRow = document.createElement('div');
+            totalRow.className = 'receipt-row total';
+            totalRow.innerHTML = `
+                <span>ยอดรวมสุทธิ:</span>
+                <span>${paymentData.total.toLocaleString()} บาท</span>
+            `;
+            receiptDetailsDiv.appendChild(totalRow);
+
+            const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${paymentData.date}`;
+            const qrcodeDiv = document.getElementById('qrcode');
+            qrcodeDiv.innerHTML = ''; 
+            new QRCode(qrcodeDiv, {
+                text: qrData,
+                width: 150,
+                height: 150,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function backToForm() {
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('receiptSection').style.display = 'none';
+            // Clear form fields and reset state
+            document.getElementById('studentName').value = '';
+            document.getElementById('phoneNumber').value = '';
+            document.getElementById('courseType').value = '';
+            document.getElementById('includeBook').checked = false;
+            document.getElementById('isNewStudent').checked = false;
+            document.getElementById('newStudentPromotion').checked = false;
+            handleNewStudentChange(); 
+            updatePricing(); 
+        }
+
+        async function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const receiptElement = document.getElementById('receiptSection'); 
+
+            // Make sure the receipt section is visible before capturing
+            receiptElement.style.display = 'block';
+            // Temporarily position off-screen to avoid visual flicker during capture
+            receiptElement.style.position = 'absolute'; 
+            receiptElement.style.left = '-9999px'; 
+            receiptElement.style.top = '-9999px';
+            receiptElement.style.zIndex = '999'; 
+
+            const canvas = await html2canvas(receiptElement, {
+                scale: 2, 
+                useCORS: true,
+                logging: false // Disable logging for cleaner console
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4'); 
+
+            const imgWidth = 210; 
+            const pageHeight = 297; 
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - pageHeight; // Correct position for next page
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+            
+            // Restore receipt section styling after capture
+            receiptElement.style.display = 'none';
+            receiptElement.style.position = 'static'; // Reset to default flow
+            receiptElement.style.left = '';
+            receiptElement.style.top = '';
+            receiptElement.style.zIndex = '';
+
+            pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
+        }
+    </script>
+</body>
+</html>
