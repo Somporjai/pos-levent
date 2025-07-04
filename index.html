@@ -4,97 +4,75 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>POS โรงเรียนเลอวองจินตคณิต</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">function addPayment() {
-      const s = getSummary();
-      const name = document.getElementById('studentName').value;
-      const phone = document.getElementById('phone').value;
-      const time = new Date().toLocaleString();
-      document.getElementById('receiptText').innerHTML = `
-        <p><strong>ชื่อ:</strong> ${name}</p>
-        <p><strong>เบอร์:</strong> ${phone}</p>
-        <p><strong>คอร์ส:</strong> ${s.label}</p>
-        <p><strong>จำนวนเดือน:</strong> ${s.months}</p>
-        <p><strong>ค่าเรียน:</strong> ${s.tuition.toLocaleString()} บาท</p>
-        <p><strong>ส่วนลด:</strong> ${s.discount.toLocaleString()} บาท</p>
-        <p><strong>ค่าใช้จ่ายอื่น:</strong> ${s.extra.toLocaleString()} บาท</p>
-        <p><strong>ยอดรวมสุทธิ:</strong> ${s.total.toLocaleString()} บาท</p>
-        <p><strong>วันที่:</strong> ${time}</p>
-        <p><em>สำเนาใบเสร็จสำหรับผู้ปกครอง</em></p>
-      `;
-      document.getElementById('receiptContainer').style.display = 'block';
-      const qr = qrcode(0, 'L');
-      qr.addData(`ชื่อ: ${name}
-ยอดรวม: ${s.total} บาท
-วันที่: ${time}`);
-      qr.make();
-      document.getElementById('qr').innerHTML = qr.createImgTag(4);
-
-      fetch(webAppUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          phone,
-          course: s.label,
-          months: s.months,
-          tuition: s.tuition,
-          discount: s.discount,
-          extra: s.extra,
-          total: s.total,
-          timestamp: time
-        })
-      })
-      .then(res => res.text())
-      .then(data => alert("📌 ส่งข้อมูลไปยัง Google Sheet แล้ว"))
-      .catch(err => alert("❌ ไม่สามารถส่งข้อมูลไป Google Sheet ได้"));
-    }
-
-    function exportPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const receipt = document.getElementById('receiptText').innerText;
-      doc.setFont('THSarabunNew', 'normal');
-      doc.setFontSize(16);
-      doc.text("โรงเรียนเลอวองจินตคณิต", 105, 20, { align: 'center' });
-      doc.text(receipt, 20, 40);
-      doc.text(".......................................", 20, 250);
-      doc.text("ลายเซ็นผู้รับเงิน", 20, 258);
-      doc.save("receipt.pdf");
-    }
-  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
     body {
-      font-family: 'TH Sarabun New', sans-serif;
+      font-family: 'Sarabun', sans-serif;
       padding: 2rem;
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
+      background: #f0f2f5;
     }
     .card {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      border-radius: 8px;
-      background-color: #f9f9f9;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
     }
-    label { display: block; margin: 0.5rem 0; }
-    input[type="text"], select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; }
-    .total { font-weight: bold; font-size: 1.2rem; color: green; }
+    h1, h2 {
+      color: #333;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    button {
+      margin-right: 1rem;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: green;
+    }
   </style>
 </head>
 <body>
   <h1>POS ระบบรับชำระเงิน โรงเรียนเลอวองจินตคณิต</h1>
   <div class="card">
     <h2>ข้อมูลนักเรียน</h2>
-    <input type="text" id="studentName" placeholder="ชื่อนักเรียน">
-    <input type="text" id="phone" placeholder="เบอร์โทรผู้ปกครอง">
+    <label>ชื่อนักเรียน <input type="text" id="studentName" placeholder="ชื่อนักเรียน"></label>
+    <label>เบอร์โทรผู้ปกครอง <input type="text" id="phone" placeholder="เบอร์โทรผู้ปกครอง"></label>
     <label><input type="checkbox" id="isNewStudent"> นักเรียนสมัครใหม่ (รับสิทธิ์ฟรีค่าสมัคร หนังสือ กระเป๋า)</label>
   </div>
   <div class="card">
     <h2>เลือกรายการชำระเงิน</h2>
-    <select id="courseSelect"></select>
+    <label>เลือกระยะเวลา:
+      <select id="courseSelect"></select>
+    </label>
     <label><input type="checkbox" id="includeBook"> 📗 เพิ่มค่าหนังสือเรียน 180 บาท</label>
-    <div id="summary"></div>
+    <div id="summary" class="total"></div>
     <button onclick="addPayment()">บันทึกรายการ</button>
     <button onclick="exportPDF()">พิมพ์ใบเสร็จ PDF</button>
   </div>
@@ -133,11 +111,9 @@
         extra += memberFee + bagFee;
       }
 
-      // โปรโมชั่นหลักสูตร
       if (selected.months === 2) discount += 200;
       else if (selected.months === 12) discount += 3600;
 
-      // สิทธิ์นักเรียนใหม่: ฟรีค่าสมัคร หนังสือ กระเป๋า (หักจาก extra เท่านั้น)
       if (isNew) {
         if (bookChecked) discount += bookFee;
         discount += memberFee + bagFee;
@@ -145,3 +121,63 @@
 
       const total = tuition + extra - discount;
       return { tuition, discount, extra, total, label: selected.label, months: selected.months };
+    }
+
+    function addPayment() {
+      const s = getSummary();
+      const name = document.getElementById('studentName').value;
+      const phone = document.getElementById('phone').value;
+      const time = new Date().toLocaleString();
+      document.getElementById('receiptText').innerHTML = `
+        <p><strong>ชื่อ:</strong> ${name}</p>
+        <p><strong>เบอร์:</strong> ${phone}</p>
+        <p><strong>คอร์ส:</strong> ${s.label}</p>
+        <p><strong>จำนวนเดือน:</strong> ${s.months}</p>
+        <p><strong>ค่าเรียน:</strong> ${s.tuition.toLocaleString()} บาท</p>
+        <p><strong>ส่วนลด:</strong> ${s.discount.toLocaleString()} บาท</p>
+        <p><strong>ค่าใช้จ่ายอื่น:</strong> ${s.extra.toLocaleString()} บาท</p>
+        <p><strong>ยอดรวมสุทธิ:</strong> ${s.total.toLocaleString()} บาท</p>
+        <p><strong>วันที่:</strong> ${time}</p>
+        <p><em>สำเนาใบเสร็จสำหรับผู้ปกครอง</em></p>
+      `;
+      document.getElementById('receiptContainer').style.display = 'block';
+      const qr = qrcode(0, 'L');
+      qr.addData(`ชื่อ: ${name}\nยอดรวม: ${s.total} บาท\nวันที่: ${time}`);
+      qr.make();
+      document.getElementById('qr').innerHTML = qr.createImgTag(4);
+
+      fetch(webAppUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          course: s.label,
+          months: s.months,
+          tuition: s.tuition,
+          discount: s.discount,
+          extra: s.extra,
+          total: s.total,
+          timestamp: time
+        })
+      })
+      .then(res => res.text())
+      .then(data => alert("📌 ส่งข้อมูลไปยัง Google Sheet แล้ว"))
+      .catch(err => alert("❌ ไม่สามารถส่งข้อมูลไป Google Sheet ได้"));
+    }
+
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const receipt = document.getElementById('receiptText').innerText;
+      doc.setFont('THSarabunNew', 'normal');
+      doc.setFontSize(16);
+      doc.text("โรงเรียนเลอวองจินตคณิต", 105, 20, { align: 'center' });
+      doc.text(receipt, 20, 40);
+      doc.text(".......................................", 20, 250);
+      doc.text("ลายเซ็นผู้รับเงิน", 20, 258);
+      doc.save("receipt.pdf");
+    }
+  </script>
+</body>
+</html>
