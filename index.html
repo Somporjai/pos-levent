@@ -375,7 +375,7 @@
                         <strong>ระบบจะบันทึกข้อมูลลงใน Google Sheets อัตโนมัติ</strong><br>
                         📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?usp=sharing" target="_blank" style="color: #4facfe;">Google Sheets (ตัวอย่าง)</a>
                         <br>
-                        <em>กรุณาแก้ไข URL ในโค้ด JavaScript ด้วย Web App URL ของคุณเอง</em>
+                        <em>URL สำหรับ Google Sheets ได้ถูกระบุในโค้ดแล้ว</em>
                     </p>
                 </div>
             </div>
@@ -419,8 +419,8 @@
 
                 <div class="price-display">
                     <div class="price-row">
-                        <span>ค่าเรียน:</span>
-                        <span id="tuitionFee">0 บาท</span>
+                        <span>ค่าเรียน (ราคาเต็ม):</span>
+                        <span id="tuitionFullPrice">0 บาท</span>
                     </div>
                     <div class="price-row" id="bookFeeRow" style="display: none;">
                         <span>ค่าหนังสือ:</span>
@@ -434,9 +434,9 @@
                         <span>ค่ากระเป๋า:</span>
                         <span id="bagFee">150 บาท</span>
                     </div>
-                    <div class="price-row" id="discountInfoRow" style="display: none;">
+                    <div class="price-row" id="courseDiscountRow" style="display: none;">
                         <span>ส่วนลด (โปรโมชั่นค่าเรียน):</span>
-                        <span id="discountInfo" class="discount-text">-0 บาท</span>
+                        <span id="courseDiscount" class="discount-text">-0 บาท</span>
                     </div>
                     <div class="price-row" id="newStudentDiscountRow" style="display: none;">
                         <span>ส่วนลด (นักเรียนใหม่):</span>
@@ -507,10 +507,10 @@
 
         // Course pricing (includes 'display' for dropdown and 'nominalFullPrice', 'savedAmount' for internal logic)
         const coursePricing = {
-            '1': { months: 1, tuition: 1200, display: '1 เดือน - 1,200 บาท', nominalFullPrice: 1200, savedAmount: 0 },
-            '2': { months: 2, tuition: 2200, display: '2 เดือน - 2,200 บาท (ประหยัด 200 บาท)', nominalFullPrice: 2400, savedAmount: 200 },
-            '5': { months: 6, tuition: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 },
-            '9': { months: 12, tuition: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 }
+            '1': { months: 1, tuitionActual: 1200, display: '1 เดือน - 1,200 บาท', nominalFullPrice: 1200, savedAmount: 0 },
+            '2': { months: 2, tuitionActual: 2200, display: '2 เดือน - 2,200 บาท (ประหยัด 200 บาท)', nominalFullPrice: 2400, savedAmount: 200 },
+            '5': { months: 6, tuitionActual: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 }, // 5 * 1200 = 6000, but gets 6 months so 6 * 1200 = 7200
+            '9': { months: 12, tuitionActual: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 } // 9 * 1200 = 10800, but gets 12 months so 12 * 1200 = 14400
         };
 
         // Constants for additional fees
@@ -548,8 +548,9 @@
             const isNewStudent = document.getElementById('isNewStudent').checked;
             const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
 
-            let tuitionFeeActual = 0; // ค่าเรียนสุทธิหลังหักส่วนลดโปรโมชั่นคอร์ส
-            let courseDiscountAmount = 0; // จำนวนเงินที่ประหยัดจากโปรโมชั่นคอร์ส
+            let tuitionActualPrice = 0; // ค่าเรียนที่ต้องจ่ายจริงตามโปรโมชั่นคอร์ส (2200, 6000, etc.)
+            let tuitionFullPrice = 0; // ค่าเรียนราคาเต็ม (2400, 7200, 14400)
+            let courseDiscountAmount = 0; // ส่วนลดที่เกิดจากโปรโมชั่นค่าเรียน (200, 1200, 3600)
             let newStudentPromoDiscount = 0; // ส่วนลดเฉพาะนักเรียนใหม่ (ค่าสมัคร, หนังสือ, กระเป๋า)
 
             let actualBookFee = 0;
@@ -559,7 +560,8 @@
             // 1. Calculate tuition fee based on selected course (includes its built-in discount)
             const selectedCourse = coursePricing[courseType];
             if (selectedCourse) {
-                tuitionFeeActual = selectedCourse.tuition;
+                tuitionActualPrice = selectedCourse.tuitionActual;
+                tuitionFullPrice = selectedCourse.nominalFullPrice;
                 courseDiscountAmount = selectedCourse.savedAmount || 0; 
             }
 
@@ -589,12 +591,12 @@
             // Sum up additional fees that are actually charged after all promotions
             const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
 
-            // Final Total Calculation: tuitionFeeActual already includes its course discount.
+            // Final Total Calculation: tuitionActualPrice is already the discounted course price.
             // newStudentPromoDiscount correctly only applies to additional fees.
-            const finalTotal = tuitionFeeActual + totalAdditionalFeesCharged; 
+            const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged; 
 
             // --- Update Display ---
-            document.getElementById('tuitionFee').textContent = tuitionFeeActual.toLocaleString() + ' บาท';
+            document.getElementById('tuitionFullPrice').textContent = tuitionFullPrice.toLocaleString() + ' บาท'; // Display full price
 
             // Show/Hide and update Book Fee
             document.getElementById('bookFeeRow').style.display = actualBookFee > 0 ? 'flex' : 'none';
@@ -609,8 +611,8 @@
             document.getElementById('bagFee').textContent = actualBagFee.toLocaleString() + ' บาท';
 
             // Show/Hide and update Course Discount Info
-            document.getElementById('discountInfoRow').style.display = courseDiscountAmount > 0 ? 'flex' : 'none';
-            document.getElementById('discountInfo').textContent = '-' + courseDiscountAmount.toLocaleString() + ' บาท';
+            document.getElementById('courseDiscountRow').style.display = courseDiscountAmount > 0 ? 'flex' : 'none';
+            document.getElementById('courseDiscount').textContent = '-' + courseDiscountAmount.toLocaleString() + ' บาท';
 
             // Show/Hide and update New Student Discount
             document.getElementById('newStudentDiscountRow').style.display = newStudentPromoDiscount > 0 ? 'flex' : 'none';
@@ -635,7 +637,8 @@
             }
 
             // --- Recalculate everything for paymentData (final values for receipt/sheets) ---
-            let tuitionFeeActual = 0; 
+            let tuitionActualPrice = 0; 
+            let tuitionFullPrice = 0;
             let courseDiscountAmount = 0; 
             let newStudentPromoDiscount = 0; 
 
@@ -645,7 +648,8 @@
             
             const selectedCourse = coursePricing[courseType];
             if (selectedCourse) {
-                tuitionFeeActual = selectedCourse.tuition;
+                tuitionActualPrice = selectedCourse.tuitionActual;
+                tuitionFullPrice = selectedCourse.nominalFullPrice;
                 courseDiscountAmount = selectedCourse.savedAmount || 0;
             }
 
@@ -668,14 +672,15 @@
             }
             
             const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
-            const finalTotal = tuitionFeeActual + totalAdditionalFeesCharged;
+            const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
 
             paymentData = {
                 studentName,
                 phoneNumber,
                 courseType,
                 courseName: selectedCourse ? selectedCourse.display : '', 
-                tuitionFee: tuitionFeeActual, 
+                tuitionActual: tuitionActualPrice, // Price customer pays for tuition after course promo
+                tuitionFull: tuitionFullPrice, // Full price of tuition before course promo
                 bookFee: actualBookFee,
                 membershipFee: actualMembershipFee,
                 bagFee: actualBagFee,
@@ -699,7 +704,7 @@
             originalBtn.style.opacity = '0.7';
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
-            // *** IMPORTANT: Replace with your actual Google Apps Script Web App URL ***
+            // *** IMPORTANT: This URL is now hardcoded as requested ***
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbzcpPpfhByzXC_JYiItzBWpZmYV_PbZxJtOU0_m7A7NMM8uffuVucxLCn7xeJ_evoGS/exec'; 
 
             const sheetsData = {
@@ -707,7 +712,9 @@
                 studentName: data.studentName,
                 phoneNumber: data.phoneNumber,
                 course: data.courseName,
-                tuitionFee: data.tuitionFee,
+                // Sending both full and actual tuition to Sheets for clarity
+                tuitionFull: data.tuitionFull,
+                tuitionActual: data.tuitionActual,
                 bookFee: data.bookFee,
                 membershipFee: data.membershipFee,
                 bagFee: data.bagFee,
@@ -737,7 +744,7 @@
             })
             .catch(error => {
                 console.error('เกิดข้อผิดพลาดในการส่งข้อมูล:', error);
-                showNotification('บันทึกข้อมูลในระบบเรียบร้อย (มีปัญหาในการส่งไป Sheets)⚠️', 'error');
+                showNotification('บันทึกข้อมูลในระบบเรียบร้อย (มีปัญหาในการส่งไป Sheets) ⚠️', 'error');
             })
             .finally(() => {
                 originalBtn.style.opacity = '1';
@@ -781,7 +788,7 @@
                 }
             };
 
-            addReceiptRow('ค่าเรียน', paymentData.tuitionFee);
+            addReceiptRow('ค่าเรียน', paymentData.tuitionFull); // Display full tuition price
             addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
             addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
             addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
