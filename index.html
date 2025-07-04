@@ -499,7 +499,7 @@
             <button class="btn export-btn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
             <button class="btn back-btn" onclick="backToForm()">กลับหน้าแรก</button>
         </div>
-    </div> ```
+    </div>
 
     <script>
         let paymentData = {};
@@ -580,19 +580,19 @@
                 if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
                 if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
                 if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; // Only if book was selected
-                
+
                 // Set the actual fees to 0 if they are covered by the new student promo
                 actualBookFee = 0;
                 actualMembershipFee = 0;
                 actualBagFee = 0;
             }
-            
+
             // Sum up additional fees that are actually charged after all promotions
             const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
 
             // Final Total Calculation: tuitionActualPrice is already the discounted course price.
             // newStudentPromoDiscount correctly only applies to additional fees.
-            const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged; 
+            const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
 
             // --- Update Display ---
             document.getElementById('tuitionFullPrice').textContent = tuitionFullPrice.toLocaleString() + ' บาท'; // Display full price
@@ -636,15 +636,15 @@
             }
 
             // --- Recalculate everything for paymentData (final values for receipt/sheets) ---
-            let tuitionActualPrice = 0; 
+            let tuitionActualPrice = 0;
             let tuitionFullPrice = 0;
-            let courseDiscountAmount = 0; 
-            let newStudentPromoDiscount = 0; 
+            let courseDiscountAmount = 0;
+            let newStudentPromoDiscount = 0;
 
             let actualBookFee = 0;
             let actualMembershipFee = 0;
             let actualBagFee = 0;
-            
+
             const selectedCourse = coursePricing [courseType];
             if (selectedCourse) {
                 tuitionActualPrice = selectedCourse.tuitionActual;
@@ -655,7 +655,7 @@
             if (includeBook) {
                 actualBookFee = BOOK_PRICE_VAL;
             }
-            if (isNewStudent) { 
+            if (isNewStudent) {
                 actualMembershipFee = MEMBERSHIP_FEE_VAL;
                 actualBagFee = BAG_PRICE_VAL;
             }
@@ -663,13 +663,13 @@
             if (isNewStudent && newStudentPromotion) {
                 if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
                 if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
-                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; 
-                
+                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee;
+
                 actualBookFee = 0;
                 actualMembershipFee = 0;
                 actualBagFee = 0;
             }
-            
+
             const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
             const finalTotal = tuitionActualPrice + totalAdditionalFeesCharged;
 
@@ -677,22 +677,22 @@
                 studentName,
                 phoneNumber,
                 courseType,
-                courseName: selectedCourse ? selectedCourse.display : '', 
+                courseName: selectedCourse ? selectedCourse.display : '',
                 tuitionActual: tuitionActualPrice, // Price customer pays for tuition after course promo
                 tuitionFull: tuitionFullPrice, // Full price of tuition before course promo
                 bookFee: actualBookFee,
                 membershipFee: actualMembershipFee,
                 bagFee: actualBagFee,
-                courseDiscount: courseDiscountAmount, 
-                newStudentDiscount: newStudentPromoDiscount, 
+                courseDiscount: courseDiscountAmount,
+                newStudentDiscount: newStudentPromoDiscount,
                 total: finalTotal,
                 date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
-                timestamp: new Date().toISOString(), 
+                timestamp: new Date().toISOString(),
                 includeBook,
                 isNewStudent,
                 newStudentPromotion
             };
-            
+
             showNotification('กำลังบันทึกข้อมูล...', 'info');
             sendToGoogleSheets(paymentData);
             showReceipt();
@@ -703,8 +703,8 @@
             originalBtn.style.opacity = '0.7';
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
-            // *** IMPORTANT: This URL is now hardcoded as requested ***
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec'; 
+            // *** IMPORTANT: This URL is now updated as requested ***
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA7GW/exec';
 
             const sheetsData = {
                 timestamp: data.timestamp, // Use the ISO string from paymentData
@@ -717,8 +717,8 @@
                 bookFee: data.bookFee,
                 membershipFee: data.membershipFee,
                 bagFee: data.bagFee,
-                courseDiscount: data.courseDiscount, 
-                newStudentDiscount: data.newStudentDiscount, 
+                courseDiscount: data.courseDiscount,
+                newStudentDiscount: data.newStudentDiscount,
                 total: data.total,
                 date: data.date,
                 includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
@@ -788,7 +788,7 @@
             };
 
             // Display full tuition price
-            addReceiptRow('ค่าเรียน', paymentData.tuitionFull, false, true); 
+            addReceiptRow('ค่าเรียน', paymentData.tuitionFull, false, true);
             addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
             addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
             addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
@@ -805,7 +805,7 @@
 
             const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${paymentData.date}`;
             const qrcodeDiv = document.getElementById('qrcode');
-            qrcodeDiv.innerHTML = ''; 
+            qrcodeDiv.innerHTML = '';
             new QRCode(qrcodeDiv, {
                 text: qrData,
                 width: 150,
@@ -826,38 +826,39 @@
             document.getElementById('includeBook').checked = false;
             document.getElementById('isNewStudent').checked = false;
             document.getElementById('newStudentPromotion').checked = false;
-            handleNewStudentChange(); 
-            updatePricing(); 
+            handleNewStudentChange();
+            updatePricing();
         }
 
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
-            const receiptElement = document.getElementById('receiptSection'); 
+            const receiptElement = document.getElementById('receiptSection');
 
-            // Make sure the receipt section is visible before capturing
-            receiptElement.style.display = 'block';
-            // Position it off-screen but still in the DOM flow to be captured correctly
-            receiptElement.style.position = 'fixed'; // Use fixed to ensure it's not affected by scroll
-            receiptElement.style.top = '0';
-            receiptElement.style.left = '-9999px'; // Move off-screen
-            receiptElement.style.opacity = '0'; // Make it invisible
-            receiptElement.style.pointerEvents = 'none'; // Disable interactions
-            receiptElement.style.zIndex = '-1'; // Send to background
-
-            // Crucially, ensure it has the correct layout width for capture
-            // Set its width explicitly before capture to ensure A4 proportions
+            // Store original styles to restore later
+            const originalDisplay = receiptElement.style.display;
+            const originalPosition = receiptElement.style.position;
+            const originalTop = receiptElement.style.top;
+            const originalLeft = receiptElement.style.left;
+            const originalOpacity = receiptElement.style.opacity;
+            const originalPointerEvents = receiptElement.style.pointerEvents;
+            const originalZIndex = receiptElement.style.zIndex;
             const originalWidth = receiptElement.style.width;
             const originalMaxWidth = receiptElement.style.maxWidth;
             const originalPadding = receiptElement.style.padding;
 
-            // Set to a reasonable fixed width that html2canvas can capture well
-            // A common "print" width for web content is around 794px for A4 portrait at 96 DPI
-            // For a 'mm' scale in jsPDF, 210mm * 3.779528 = approx 794px
-            // Let's set a fixed pixel width that aligns with our container's max-width if possible
-            receiptElement.style.width = '480px'; // Set to match the container's max-width or your desired print width
-            receiptElement.style.maxWidth = '480px';
-            receiptElement.style.padding = '30px'; // Restore original padding or set explicitly for PDF capture clarity
+            // Make it visible and positioned for capture, but hidden from user interaction
+            receiptElement.style.display = 'block';
+            receiptElement.style.position = 'fixed';
+            receiptElement.style.top = '-9999px'; // Move off-screen
+            receiptElement.style.left = '-9999px'; // Move off-screen
+            receiptElement.style.opacity = '0';
+            receiptElement.style.pointerEvents = 'none';
+            receiptElement.style.zIndex = '-1';
 
+            // Set fixed width for capture, matching container max-width
+            receiptElement.style.width = '480px';
+            receiptElement.style.maxWidth = '480px';
+            receiptElement.style.padding = '30px'; // Ensure consistent padding for PDF
 
             const canvas = await html2canvas(receiptElement, {
                 scale: 2, // Higher scale for better quality
@@ -884,19 +885,18 @@
                 pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
             }
-            
-            // Restore original styles after capture
-            receiptElement.style.display = 'none';
-            receiptElement.style.position = 'static'; // Reset to default flow
-            receiptElement.style.top = '';
-            receiptElement.style.left = '';
-            receiptElement.style.opacity = '';
-            receiptElement.style.pointerEvents = '';
-            receiptElement.style.zIndex = '';
-            receiptElement.style.width = originalWidth; // Restore original CSS width
-            receiptElement.style.maxWidth = originalMaxWidth; // Restore original CSS max-width
-            receiptElement.style.padding = originalPadding; // Restore original CSS padding
 
+            // Restore original styles after PDF generation
+            receiptElement.style.display = originalDisplay;
+            receiptElement.style.position = originalPosition;
+            receiptElement.style.top = originalTop;
+            receiptElement.style.left = originalLeft;
+            receiptElement.style.opacity = originalOpacity;
+            receiptElement.style.pointerEvents = originalPointerEvents;
+            receiptElement.style.zIndex = originalZIndex;
+            receiptElement.style.width = originalWidth;
+            receiptElement.style.maxWidth = originalMaxWidth;
+            receiptElement.style.padding = originalPadding;
 
             pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
         }
