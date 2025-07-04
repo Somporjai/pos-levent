@@ -695,7 +695,7 @@
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
             // *** IMPORTANT: This URL is now hardcoded as requested ***
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA7GW/exec';
 
             const sheetsData = {
                 timestamp: data.timestamp, // Use the ISO string from paymentData
@@ -826,6 +826,8 @@
             const receiptElement = document.getElementById('receiptSection');
             const exportPdfBtn = document.getElementById('exportPdfBtn');
             const backToFormBtn = document.getElementById('backToFormBtn');
+            // Select the newly added Google Sheet link paragraph
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
 
 
             // Store original body styles
@@ -848,9 +850,12 @@
             const originalReceiptTransform = receiptElement.style.transform;
 
             // --- START Temporary adjustments for PDF capture ---
-            // Hide buttons from html2canvas capture
+            // Hide buttons and the Google Sheet link from html2canvas capture
             exportPdfBtn.classList.add('hide-on-pdf');
             backToFormBtn.classList.add('hide-on-pdf');
+            if (googleSheetLinkParagraph) { // Ensure the element exists before trying to hide it
+                googleSheetLinkParagraph.classList.add('hide-on-pdf');
+            }
 
 
             // Temporarily adjust body for full content capture
@@ -868,8 +873,6 @@
             receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
 
             // Set fixed width and padding for consistent rendering, matching A4 aspect
-            // Using pixels based on 96 DPI for A4: 210mm * 3.779528 px/mm = ~794px
-            // 20mm margin = 20 * 3.779528 = ~75.5px
             receiptElement.style.width = '794px'; // A4 width in pixels at 96 DPI
             receiptElement.style.maxWidth = '794px';
             receiptElement.style.padding = '75.5px'; // Standard A4 margins in pixels, adjust if needed
@@ -914,9 +917,12 @@
                 // --- END Temporary adjustments for PDF capture ---
                 // Restore original styles after PDF generation
 
-                // Restore button visibility
+                // Restore button and Google Sheet link visibility
                 exportPdfBtn.classList.remove('hide-on-pdf');
                 backToFormBtn.classList.remove('hide-on-pdf');
+                if (googleSheetLinkParagraph) {
+                    googleSheetLinkParagraph.classList.remove('hide-on-pdf');
+                }
 
                 document.body.style.overflow = originalBodyOverflow;
                 document.body.style.margin = originalBodyMargin;
