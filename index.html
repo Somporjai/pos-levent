@@ -1056,11 +1056,7 @@
             addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
             
             addReceiptRow('ส่วนลด (โปรโมชั่นคอร์สหลัก)', -paymentData.courseDiscount, true); 
-            // Display combined combo discounts
-            const totalComboDiscountDisplay = paymentData.englishComboDiscount + paymentData.abacusComboDiscount + paymentData.mathComboDiscount;
-            if (totalComboDiscountDisplay > 0) {
-                addReceiptRow('ส่วนลด (คอร์สเสริมคอมโบ)', -totalComboDiscountDisplay, true); 
-            }
+            addReceiptRow('ส่วนลด (คอร์สเสริมคอมโบ)', -(paymentData.englishComboDiscount + paymentData.abacusComboDiscount + paymentData.mathComboDiscount), true); // Sum all combo discounts
             addReceiptRow('ส่วนลด (นักเรียนใหม่)', -paymentData.newStudentDiscount, true);
 
 
