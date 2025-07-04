@@ -302,6 +302,11 @@
             color: #333;
             margin-top: 10px;
         }
+        
+        /* New CSS class to hide elements when generating PDF */
+        .hide-on-pdf {
+            display: none !important;
+        }
 
         /* Notification styles */
         .notification {
@@ -482,8 +487,8 @@
                 <p>โรงเรียนเลอวองจินตคณิต</p>
                 </div>
 
-            <button class="btn export-btn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
-            <button class="btn back-btn" onclick="backToForm()">กลับหน้าแรก</button>
+            <button class="btn export-btn" id="exportPdfBtn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
+            <button class="btn back-btn" id="backToFormBtn" onclick="backToForm()">กลับหน้าแรก</button>
         </div>
     </div>
 
@@ -819,6 +824,9 @@
         async function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const receiptElement = document.getElementById('receiptSection');
+            const exportPdfBtn = document.getElementById('exportPdfBtn');
+            const backToFormBtn = document.getElementById('backToFormBtn');
+
 
             // Store original body styles
             const originalBodyOverflow = document.body.style.overflow;
@@ -836,8 +844,14 @@
             const originalReceiptWidth = receiptElement.style.width;
             const originalReceiptMaxWidth = receiptElement.style.maxWidth;
             const originalReceiptPadding = receiptElement.style.padding;
-            const originalReceiptBoxSizing = receiptElement.style.boxSizing; // Capture box-sizing
+            const originalReceiptBoxSizing = receiptElement.style.boxSizing;
             const originalReceiptTransform = receiptElement.style.transform;
+
+            // --- START Temporary adjustments for PDF capture ---
+            // Hide buttons from html2canvas capture
+            exportPdfBtn.classList.add('hide-on-pdf');
+            backToFormBtn.classList.add('hide-on-pdf');
+
 
             // Temporarily adjust body for full content capture
             document.body.style.overflow = 'hidden'; // Prevent scrollbars during capture
@@ -852,7 +866,7 @@
             receiptElement.style.visibility = 'visible'; // Must be visible
             receiptElement.style.pointerEvents = 'none'; // Disable interactions
             receiptElement.style.zIndex = '9999'; // Ensure it's on top of everything for capture
-            
+
             // Set fixed width and padding for consistent rendering, matching A4 aspect
             // Using pixels based on 96 DPI for A4: 210mm * 3.779528 px/mm = ~794px
             // 20mm margin = 20 * 3.779528 = ~75.5px
@@ -870,14 +884,12 @@
                 const canvas = await html2canvas(receiptElement, {
                     scale: 3, // Increased scale for even better quality (higher resolution PDF)
                     useCORS: true,
-                    logging: true, // Enable logging for debugging html2canvas issues
-                    // windowWidth: receiptElement.offsetWidth, // Capture actual rendered width
-                    // windowHeight: receiptElement.offsetHeight // Capture actual rendered height
+                    logging: false // Disable logging for cleaner console in production, can set to true for debug
                 });
 
                 // For debugging: open the captured image in a new tab
                 // const imgDebug = canvas.toDataURL('image/png');
-                // window.open(imgDebug); // Uncomment this line to debug the captured image
+                // window.open(imgDebug);
                 // console.log("html2canvas captured image data length:", imgDebug.length);
 
 
@@ -890,7 +902,7 @@
 
                 // Add image to PDF. No need for multi-page logic if content fits one page.
                 // If content is too long for one page, it will be cut off.
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeightScaled); 
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeightScaled);
                 // Removed the while loop and multi-page logic, as requested for single page.
 
                 pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
@@ -899,7 +911,13 @@
                 console.error("Error during PDF generation:", error);
                 alert("เกิดข้อผิดพลาดในการสร้าง PDF: " + error.message);
             } finally {
-                // Always restore original styles
+                // --- END Temporary adjustments for PDF capture ---
+                // Restore original styles after PDF generation
+
+                // Restore button visibility
+                exportPdfBtn.classList.remove('hide-on-pdf');
+                backToFormBtn.classList.remove('hide-on-pdf');
+
                 document.body.style.overflow = originalBodyOverflow;
                 document.body.style.margin = originalBodyMargin;
 
@@ -914,7 +932,7 @@
                 receiptElement.style.width = originalReceiptWidth;
                 receiptElement.style.maxWidth = originalReceiptMaxWidth;
                 receiptElement.style.padding = originalReceiptPadding;
-                receiptElement.style.boxSizing = originalReceiptBoxSizing; // Restore box-sizing
+                receiptElement.style.boxSizing = originalReceiptBoxSizing;
                 receiptElement.style.transform = originalReceiptTransform;
             }
         }
