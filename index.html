@@ -11,354 +11,369 @@
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* Global Reset and Font */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-        body {
-            font-family: 'Sarabun', sans-serif; /* Use Sarabun from Google Fonts */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top for longer content */
-            overflow-y: auto; /* Enable scrolling for small screens */
-        }
+body {
+    font-family: 'Sarabun', sans-serif; /* Use Sarabun from Google Fonts */
+    /* *** คำแนะนำสำหรับสีพื้นหลัง BODY: เลือกแบบใดแบบหนึ่งด้านล่าง *** */
+    /* background: #F0F0F0;  // สีเทาอ่อนมาก */
+    background: #E0F2F7; /* สีฟ้าอ่อนมาก (แนะนำ) */
+    /* background: linear-gradient(135deg, #e0f7fa 0%, #e1f5fe 100%); // Gradient ฟ้าอ่อน */
+    /* ******************************************************************* */
+    min-height: 100vh;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top for longer content */
+    overflow-y: auto; /* Enable scrolling for small screens */
+}
 
-        /* Container */
-        .container {
-            max-width: 480px;
-            width: 100%;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-            position: relative; /* For receipt positioning */
-        }
+/* Container */
+.container {
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative; /* For receipt positioning */
+}
 
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
+/* Header */
+.header {
+    background: #2A3A96; /* สีน้ำเงินเข้มตามที่ระบุ */
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
 
-        .logo {
-            width: 80px; /* Increased size */
-            height: 80px; /* Increased size */
-            background: white;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #4facfe;
-            /* Using a real image for logo */
-            background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
-            background-size: contain; /* Change to contain to fit logo better */
-            background-repeat: no-repeat;
-            background-position: center;
-            border: 2px solid #fff;
-        }
+.logo {
+    width: 80px; /* Increased size */
+    height: 80px; /* Increased size */
+    background: white;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #2A3A96; /* สีน้ำเงินเข้มตามธีม (เพื่อให้ logo ดูเข้ากับ header) */
+    /* Using a real image for logo */
+    background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
+    background-size: contain; /* Change to contain to fit logo better */
+    background-repeat: no-repeat;
+    background-position: center;
+    border: 2px solid #fff;
+}
 
-        .header h1 {
-            font-size: 24px; /* Adjusted size */
-            font-weight: 700; /* Sarabun Bold */
-            margin-bottom: 5px;
-        }
+.header h1 {
+    font-size: 24px; /* Adjusted size */
+    font-weight: 700; /* Sarabun Bold */
+    margin-bottom: 5px;
+}
 
-        .header p {
-            font-size: 15px; /* Adjusted size */
-            opacity: 0.9;
-        }
+.header p {
+    font-size: 15px; /* Adjusted size */
+    opacity: 0.9;
+}
 
-        /* Form Container */
-        .form-container {
-            padding: 25px;
-        }
+/* Form Container */
+.form-container {
+    padding: 25px;
+}
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+.form-group {
+    margin-bottom: 20px;
+}
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600; /* Sarabun SemiBold */
-            color: #333;
-            font-size: 15px;
-        }
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600; /* Sarabun SemiBold */
+    color: #333;
+    font-size: 15px;
+}
 
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: 'Sarabun', sans-serif;
-            transition: all 0.3s ease;
-        }
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'Sarabun', sans-serif;
+    transition: all 0.3s ease;
+}
 
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #4facfe;
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
-        }
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: #2A3A96; /* สีน้ำเงินเข้ม */
+    box-shadow: 0 0 0 3px rgba(42, 58, 150, 0.1); /* ปรับ shadow ตามสีใหม่ */
+}
 
-        /* Checkbox Group */
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            cursor: pointer; /* Indicate clickable */
-        }
+/* Checkbox Group */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer; /* Indicate clickable */
+}
 
-        .checkbox-group:hover {
-            border-color: #4facfe;
-        }
+.checkbox-group:hover {
+    border-color: #2A3A96; /* สีน้ำเงินเข้ม */
+}
 
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            accent-color: #4facfe;
-        }
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    accent-color: #2A3A96; /* สีน้ำเงินเข้ม */
+}
 
-        .checkbox-group label {
-            margin: 0;
-            font-size: 15px;
-            color: #555;
-            flex-grow: 1; /* Allow label to take full width */
-            cursor: pointer;
-        }
+.checkbox-group label {
+    margin: 0;
+    font-size: 15px;
+    color: #555;
+    flex-grow: 1; /* Allow label to take full width */
+    cursor: pointer;
+}
 
-        /* Price Display */
-        .price-display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-        }
+/* Price Display */
+.price-display {
+    background: #2A3A96; /* สีน้ำเงินเข้ม */
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
 
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 15px;
-        }
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
 
-        .price-row.total {
-            font-weight: 700; /* Sarabun Bold */
-            font-size: 20px; /* Adjusted size */
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            margin-top: 15px;
-        }
+.price-row.total {
+    font-weight: 700; /* Sarabun Bold */
+    font-size: 20px; /* Adjusted size */
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    margin-top: 15px;
+}
 
-        .discount-text {
-            color: #d4edda; /* Lighter green for readability on dark background */
-            font-weight: 600;
-        }
+.discount-text {
+    color: #D4EDDA; /* สีเขียวอ่อนสำหรับตัวอักษรบนพื้นหลังสีน้ำเงินเข้ม (สามารถปรับได้ถ้าต้องการสีสว่างอื่น) */
+    font-weight: 600;
+}
 
-        /* Buttons */
-        .btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px; /* Adjusted size */
-            font-weight: 700; /* Sarabun Bold */
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-        }
+/* Buttons */
+.btn {
+    width: 100%;
+    padding: 15px;
+    background: #2A3A96; /* สีน้ำเงินเข้มตามที่ระบุ */
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px; /* Adjusted size */
+    font-weight: 700; /* Sarabun Bold */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(79, 172, 254, 0.3);
-        }
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(42, 58, 150, 0.3); /* ปรับ shadow ตามสีใหม่ */
+}
 
-        /* Receipt Section */
-        .receipt {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            margin-top: 20px; /* Ensure space from top for mobile */
-            display: none; /* Hidden by default */
-            width: 100%; /* Ensure it takes full width of container */
-            max-width: 480px; /* Match container max-width */
-            box-sizing: border-box; /* Include padding in width */
-            overflow-y: auto; /* Enable scrolling for receipt on small screens */
-            z-index: 100; /* Ensure it's on top */
-        }
+/* Receipt Section */
+.receipt {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-top: 20px; /* Ensure space from top for mobile */
+    display: none; /* Hidden by default */
+    width: 100%; /* Ensure it takes full width of container */
+    max-width: 480px; /* Match container max-width */
+    box-sizing: border-box; /* Include padding in width */
+    overflow-y: auto; /* Enable scrolling for receipt on small screens */
+    z-index: 100; /* Ensure it's on top */
+}
 
-        .receipt-header {
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
-        }
+.receipt-header {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 20px;
+}
 
-        .receipt-logo {
-            width: 80px;
-            height: 80px;
-            background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            border-radius: 50%;
-            margin: 0 auto 15px;
-            border: 2px solid #ddd;
-        }
+.receipt-logo {
+    width: 80px;
+    height: 80px;
+    background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    border: 2px solid #ddd;
+}
 
-        .receipt-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 5px;
-        }
+.receipt-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
 
-        .receipt-subtitle {
-            font-size: 16px;
-            color: #666;
-            font-weight: 600;
-        }
+.receipt-subtitle {
+    font-size: 16px;
+    color: #666;
+    font-weight: 600;
+}
 
-        .receipt-info {
-            margin-bottom: 20px;
-        }
+.receipt-info {
+    margin-bottom: 20px;
+}
 
-        .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
+.receipt-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 15px;
+}
 
-        .receipt-row.total {
-            font-weight: 700;
-            font-size: 18px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            margin-top: 15px;
-        }
+.receipt-row.total {
+    font-weight: 700;
+    font-size: 18px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    margin-top: 15px;
+}
 
-        .qr-section {
-            text-align: center;
-            margin: 25px 0;
-            /* Removed QR code display related styles as QR code is removed */
-        }
+.qr-section {
+    text-align: center;
+    margin: 25px 0;
+    /* Removed QR code display related styles as QR code is removed */
+}
 
-        /* #qrcode canvas removed as QR code is removed */
+/* #qrcode canvas removed as QR code is removed */
 
-        .signature-section {
-            margin-top: 30px;
-            text-align: right;
-            padding-right: 20px; /* Add some padding */
-            line-height: 2; /* Increased line height for signature */
-        }
+.signature-section {
+    margin-top: 30px;
+    text-align: right;
+    padding-right: 20px; /* Add some padding */
+    line-height: 2; /* Increased line height for signature */
+}
 
-        .signature-line {
-            border-top: 1px solid #333;
-            width: 200px;
-            margin: 10px 0 5px auto; /* Adjusted margin for spacing */
-        }
+.signature-line {
+    border-top: 1px solid #333;
+    width: 200px;
+    margin: 10px 0 5px auto; /* Adjusted margin for spacing */
+}
 
-        .receipt-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            font-size: 13px;
-            color: #666;
-        }
+.receipt-footer {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    font-size: 13px;
+    color: #666;
+}
 
-        .export-btn {
-            background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
-            margin-top: 20px;
-        }
+/* Secondary Buttons (ใช้สีเหลืองทอง #FCD414) */
+.export-btn {
+    background: #FCD414; /* สีเหลืองทองตามที่ระบุ */
+    color: #333; /* ตัวอักษรสีเข้มเพื่อให้ตัดกับสีเหลืองและอ่านได้ชัดเจน */
+    border: none; /* เพิ่ม border: none; เพื่อความสม่ำเสมอ */
+    margin-top: 20px;
+}
+.export-btn:hover {
+    box-shadow: 0 10px 25px rgba(252, 212, 20, 0.3); /* ปรับ shadow ตามสีเหลืองทอง */
+}
 
-        .back-btn {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-            color: #333;
-            margin-top: 10px;
-        }
-        
-        /* New CSS class to hide elements when generating PDF */
-        .hide-on-pdf {
-            display: none !important;
-        }
+.back-btn {
+    background: #FCD414; /* สีเหลืองทองตามที่ระบุ */
+    color: #333; /* ตัวอักษรสีเข้มเพื่อให้ตัดกับสีเหลืองและอ่านได้ชัดเจน */
+    border: none; /* เพิ่ม border: none; เพื่อความสม่ำเสมอ */
+    margin-top: 10px;
+}
+.back-btn:hover {
+    box-shadow: 0 10px 25px rgba(252, 212, 20, 0.3); /* ปรับ shadow ตามสีเหลืองทอง */
+}
 
-        /* Notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 10px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            max-width: 300px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: opacity 0.5s ease-in-out;
-        }
+/* New CSS class to hide elements when generating PDF */
+.hide-on-pdf {
+    display: none !important;
+}
 
-        .notification.success {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    z-index: 1000;
+    max-width: 300px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: opacity 0.5s ease-in-out;
+}
 
-        .notification.error {
-            background: linear-gradient(135deg, #fd746c 0%, #ff9068 100%);
-        }
+.notification.success {
+    background: #2A3A96; /* สีน้ำเงินเข้ม */
+    color: white;
+}
 
-        .notification.info {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #333;
-        }
+.notification.error {
+    background: #FCD414; /* สีเหลืองทอง */
+    color: #333; /* ตัวอักษรสีเข้ม */
+}
 
-        /* Responsive adjustments */
-        @media (max-width: 480px) {
-            body {
-                padding: 0;
-                align-items: stretch; /* Stretch to fill viewport height */
-            }
-            .container {
-                margin: 0;
-                border-radius: 0;
-                min-height: 100vh;
-                box-shadow: none;
-            }
-            .form-container, .receipt {
-                padding: 15px;
-            }
-            .header h1 {
-                font-size: 20px;
-            }
-            .header p {
-                font-size: 13px;
-            }
-            .btn {
-                font-size: 16px;
-                padding: 12px;
-            }
-        }
+.notification.info {
+    background: #FCD414; /* สีเหลืองทอง */
+    color: #333; /* ตัวอักษรสีเข้ม */
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+        align-items: stretch; /* Stretch to fill viewport height */
+    }
+    .container {
+        margin: 0;
+        border-radius: 0;
+        min-height: 100vh;
+        box-shadow: none;
+    }
+    .form-container, .receipt {
+        padding: 15px;
+    }
+    .header h1 {
+        font-size: 20px;
+    }
+    .header p {
+        font-size: 13px;
+    }
+    .btn {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
     </style>
 </head>
 <body>
