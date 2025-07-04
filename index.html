@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบ POS - เลอวองจินตคณิต</title>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -263,12 +262,10 @@
         .qr-section {
             text-align: center;
             margin: 25px 0;
+            /* Removed QR code display related styles as QR code is removed */
         }
 
-        #qrcode canvas {
-            display: block; /* Remove extra space below canvas */
-            margin: 0 auto; /* Center the QR code */
-        }
+        /* #qrcode canvas removed as QR code is removed */
 
         .signature-section {
             margin-top: 30px;
@@ -475,7 +472,6 @@
                 </div>
 
             <div class="qr-section">
-                <div id="qrcode"></div>
                 </div>
 
             <div class="signature-section">
@@ -640,7 +636,7 @@
             const selectedCourse = coursePricing [courseType];
             if (selectedCourse) {
                 tuitionActualPrice = selectedCourse.tuitionActual;
-                tuitionFullPrice = selectedCourse.nominalFullPrice; // Fixed: Removed .type
+                tuitionFullPrice = selectedCourse.nominalFullPrice; // Corrected: Removed .type
                 courseDiscountAmount = selectedCourse.savedAmount || 0;
             }
 
@@ -696,7 +692,7 @@
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
             // *** IMPORTANT: This URL is now hardcoded as requested ***
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbyV-nIqvTo1NciDPF12Bt1pNO_fCOtFpSSJjjsDg4-tIkkfMBaXGuIRuFQJbiTmlcYA/exec';
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
 
             const sheetsData = {
                 timestamp: data.timestamp, // Use the ISO string from paymentData
@@ -801,18 +797,11 @@
             `;
             receiptDetailsDiv.appendChild(totalRow);
 
-            // Re-instantiate QRCode for qrcode.js library
+            // QR Code generation is now removed completely.
             const qrCodeDiv = document.getElementById('qrcode');
-            qrCodeDiv.innerHTML = ''; // Clear previous QR code
-            const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${new Date().toLocaleDateString('th-TH')}`;
-            new QRCode(qrCodeDiv, {
-                text: qrData,
-                width: 150,
-                height: 150,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            if (qrCodeDiv) { // Ensure div exists if it wasn't removed from HTML
+                qrCodeDiv.innerHTML = ''; // Clear any content just in case
+            }
             
             // Show the Google Sheet link after the receipt is rendered
             const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
@@ -915,7 +904,7 @@
                 // console.log("html2canvas captured image data length:", imgDebug.length);
 
 
-                const imgData = canvas.toDataURL('image/png');
+                const imgData = canvas.toDataURL('image:png'); // Corrected: image/png
                 const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
 
                 const pdfWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
