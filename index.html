@@ -62,7 +62,7 @@
             font-weight: bold;
             color: #4facfe;
             /* Using a real image for logo */
-            background-image: url('./logo.png'); /* *** PATH ADJUSMENT: Use ./ for current directory *** */
+            background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
             background-size: cover;
             background-position: center;
             border: 2px solid #fff;
@@ -221,7 +221,7 @@
         .receipt-logo {
             width: 80px;
             height: 80px;
-            background-image: url('./logo.png'); /* *** PATH ADJUSMENT: Use ./ for current directory *** */
+            background-image: url('./logo.png'); /* Ensure logo.png is in the same directory */
             background-size: cover;
             background-position: center;
             border-radius: 50%;
@@ -434,9 +434,9 @@
                         <span>ค่ากระเป๋า:</span>
                         <span id="bagFee">150 บาท</span>
                     </div>
-                    <div class="price-row" id="discountRow" style="display: none;">
+                    <div class="price-row" id="discountInfoRow" style="display: none;">
                         <span>ส่วนลด (โปรโมชั่นค่าเรียน):</span>
-                        <span id="discount" class="discount-text">-0 บาท</span>
+                        <span id="discountInfo" class="discount-text">-0 บาท</span>
                     </div>
                     <div class="price-row" id="newStudentDiscountRow" style="display: none;">
                         <span>ส่วนลด (นักเรียนใหม่):</span>
@@ -505,15 +505,16 @@
     <script>
         let paymentData = {};
 
-        // Course pricing (courseNameDisplay added for better receipt description)
+        // Course pricing (includes 'display' for dropdown and 'nominalFullPrice', 'savedAmount' for internal logic)
         const coursePricing = {
-            '1': { months: 1, price: 1200, discount: 0, courseNameDisplay: '1 เดือน' },
-            '2': { months: 2, price: 2200, discount: 200, courseNameDisplay: '2 เดือน (ประหยัด 200 บาท)' },
-            '5': { months: 6, price: 6000, discount: 1200, courseNameDisplay: '5 เดือน (ได้เรียน 6 เดือน)' },
-            '9': { months: 12, price: 10800, discount: 3600, courseNameDisplay: '9 เดือน (ได้เรียน 12 เดือน)' }
+            '1': { months: 1, tuition: 1200, display: '1 เดือน - 1,200 บาท', nominalFullPrice: 1200, savedAmount: 0 },
+            '2': { months: 2, tuition: 2200, display: '2 เดือน - 2,200 บาท (ประหยัด 200 บาท)', nominalFullPrice: 2400, savedAmount: 200 },
+            '5': { months: 6, tuition: 6000, display: '5 เดือน - 6,000 บาท (ได้เรียน 6 เดือน)', nominalFullPrice: 7200, savedAmount: 1200 },
+            '9': { months: 12, tuition: 10800, display: '9 เดือน - 10,800 บาท (ได้เรียน 12 เดือน)', nominalFullPrice: 14400, savedAmount: 3600 }
         };
 
         // Constants for additional fees
+        const BASE_COURSE_PRICE_PER_MONTH = 1200; // Added for calculating nominal full price if needed
         const BOOK_PRICE_VAL = 180;
         const MEMBERSHIP_FEE_VAL = 200;
         const BAG_PRICE_VAL = 150;
@@ -547,54 +548,53 @@
             const isNewStudent = document.getElementById('isNewStudent').checked;
             const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
 
-            let tuitionFee = 0;
-            let courseDiscount = 0; // Discount from course selection (2, 5, 9 months)
-            let newStudentPromoDiscount = 0; // Discount from new student promotion
+            let tuitionFeeActual = 0; // ค่าเรียนสุทธิหลังหักส่วนลดโปรโมชั่นคอร์ส
+            let courseDiscountAmount = 0; // จำนวนเงินที่ประหยัดจากโปรโมชั่นคอร์ส
+            let newStudentPromoDiscount = 0; // ส่วนลดเฉพาะนักเรียนใหม่ (ค่าสมัคร, หนังสือ, กระเป๋า)
 
             let actualBookFee = 0;
             let actualMembershipFee = 0;
             let actualBagFee = 0;
 
-            // 1. Calculate tuition fee and course discount
+            // 1. Calculate tuition fee based on selected course (includes its built-in discount)
             const selectedCourse = coursePricing[courseType];
             if (selectedCourse) {
-                tuitionFee = selectedCourse.price;
-                courseDiscount = selectedCourse.discount;
+                tuitionFeeActual = selectedCourse.tuition;
+                courseDiscountAmount = selectedCourse.savedAmount || 0; 
             }
 
             // 2. Calculate initial additional fees (before new student promo)
+            // These are the fees that would be charged if new student promo is NOT applied
             if (includeBook) {
                 actualBookFee = BOOK_PRICE_VAL;
             }
-            // Membership and bag are only applicable if student is new AND not using new student promo
-            if (isNewStudent && !newStudentPromotion) { // Only if new student AND NOT using new student promo
+            if (isNewStudent) { // Only new students might pay for membership/bag
                 actualMembershipFee = MEMBERSHIP_FEE_VAL;
                 actualBagFee = BAG_PRICE_VAL;
             }
 
-
-            // 3. Apply new student promotion discount
+            // 3. Apply new student promotion discount if selected
             if (isNewStudent && newStudentPromotion) {
-                newStudentPromoDiscount += MEMBERSHIP_FEE_VAL; // Free enrollment
-                newStudentPromoDiscount += BAG_PRICE_VAL;     // Free bag
+                // Determine how much discount to apply to *these* fees if they are currently charged
+                if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
+                if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
+                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; // Only if book was selected
                 
-                // If book was selected, it's also free
-                if (includeBook) {
-                    newStudentPromoDiscount += BOOK_PRICE_VAL; // Free book
-                    actualBookFee = 0; // Set to 0 for display and final calculation
-                }
-                actualMembershipFee = 0; // Set to 0 for display and final calculation
-                actualBagFee = 0;      // Set to 0 for display and final calculation
+                // Set the actual fees to 0 if they are covered by the new student promo
+                actualBookFee = 0;
+                actualMembershipFee = 0;
+                actualBagFee = 0;
             }
             
-            // Total additional fees that are actually charged
+            // Sum up additional fees that are actually charged after all promotions
             const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
 
-            // Final Total Calculation
-            const finalTotal = tuitionFee + totalAdditionalFeesCharged - courseDiscount - newStudentPromoDiscount;
+            // Final Total Calculation: tuitionFeeActual already includes its course discount.
+            // newStudentPromoDiscount correctly only applies to additional fees.
+            const finalTotal = tuitionFeeActual + totalAdditionalFeesCharged; 
 
             // --- Update Display ---
-            document.getElementById('tuitionFee').textContent = tuitionFee.toLocaleString() + ' บาท';
+            document.getElementById('tuitionFee').textContent = tuitionFeeActual.toLocaleString() + ' บาท';
 
             // Show/Hide and update Book Fee
             document.getElementById('bookFeeRow').style.display = actualBookFee > 0 ? 'flex' : 'none';
@@ -608,9 +608,9 @@
             document.getElementById('bagFeeRow').style.display = actualBagFee > 0 ? 'flex' : 'none';
             document.getElementById('bagFee').textContent = actualBagFee.toLocaleString() + ' บาท';
 
-            // Show/Hide and update Course Discount
-            document.getElementById('discountRow').style.display = courseDiscount > 0 ? 'flex' : 'none';
-            document.getElementById('discount').textContent = '-' + courseDiscount.toLocaleString() + ' บาท';
+            // Show/Hide and update Course Discount Info
+            document.getElementById('discountInfoRow').style.display = courseDiscountAmount > 0 ? 'flex' : 'none';
+            document.getElementById('discountInfo').textContent = '-' + courseDiscountAmount.toLocaleString() + ' บาท';
 
             // Show/Hide and update New Student Discount
             document.getElementById('newStudentDiscountRow').style.display = newStudentPromoDiscount > 0 ? 'flex' : 'none';
@@ -634,10 +634,10 @@
                 return;
             }
 
-            // --- Recalculate everything for paymentData (final values) ---
-            let tuitionFee = 0;
-            let courseDiscount = 0;
-            let newStudentPromoDiscount = 0;
+            // --- Recalculate everything for paymentData (final values for receipt/sheets) ---
+            let tuitionFeeActual = 0; 
+            let courseDiscountAmount = 0; 
+            let newStudentPromoDiscount = 0; 
 
             let actualBookFee = 0;
             let actualMembershipFee = 0;
@@ -645,46 +645,45 @@
             
             const selectedCourse = coursePricing[courseType];
             if (selectedCourse) {
-                tuitionFee = selectedCourse.price;
-                courseDiscount = selectedCourse.discount;
+                tuitionFeeActual = selectedCourse.tuition;
+                courseDiscountAmount = selectedCourse.savedAmount || 0;
             }
 
             if (includeBook) {
                 actualBookFee = BOOK_PRICE_VAL;
             }
-            if (isNewStudent && !newStudentPromotion) {
+            if (isNewStudent) { 
                 actualMembershipFee = MEMBERSHIP_FEE_VAL;
                 actualBagFee = BAG_PRICE_VAL;
             }
 
             if (isNewStudent && newStudentPromotion) {
-                newStudentPromoDiscount += MEMBERSHIP_FEE_VAL;
-                newStudentPromoDiscount += BAG_PRICE_VAL;
-                if (includeBook) {
-                    newStudentPromoDiscount += BOOK_PRICE_VAL;
-                }
+                if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
+                if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
+                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; 
+                
                 actualBookFee = 0;
                 actualMembershipFee = 0;
                 actualBagFee = 0;
             }
             
             const totalAdditionalFeesCharged = actualBookFee + actualMembershipFee + actualBagFee;
-            const finalTotal = tuitionFee + totalAdditionalFeesCharged - courseDiscount - newStudentPromoDiscount;
+            const finalTotal = tuitionFeeActual + totalAdditionalFeesCharged;
 
             paymentData = {
                 studentName,
                 phoneNumber,
                 courseType,
-                courseName: selectedCourse ? selectedCourse.courseNameDisplay : '',
-                tuitionFee: tuitionFee, // ค่าเรียนตามโปรโมชั่นเดือน
+                courseName: selectedCourse ? selectedCourse.display : '', 
+                tuitionFee: tuitionFeeActual, 
                 bookFee: actualBookFee,
                 membershipFee: actualMembershipFee,
                 bagFee: actualBagFee,
-                courseDiscount: courseDiscount,
-                newStudentDiscount: newStudentPromoDiscount,
+                courseDiscount: courseDiscountAmount, 
+                newStudentDiscount: newStudentPromoDiscount, 
                 total: finalTotal,
                 date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
-                timestamp: new Date().toISOString(), // เพิ่ม timestamp เพื่อบันทึกเวลาที่แน่นอน
+                timestamp: new Date().toISOString(), 
                 includeBook,
                 isNewStudent,
                 newStudentPromotion
@@ -704,7 +703,7 @@
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbzcpPpfhByzXC_JYiItzBWpZmYV_PbZxJtOU0_m7A7NMM8uffuVucxLCn7xeJ_evoGS/exec'; 
 
             const sheetsData = {
-                timestamp: new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }),
+                timestamp: data.timestamp, // Use the ISO string from paymentData
                 studentName: data.studentName,
                 phoneNumber: data.phoneNumber,
                 course: data.courseName,
@@ -712,8 +711,8 @@
                 bookFee: data.bookFee,
                 membershipFee: data.membershipFee,
                 bagFee: data.bagFee,
-                courseDiscount: data.courseDiscount, // แยกส่วนลดค่าเรียน
-                newStudentDiscount: data.newStudentDiscount, // แยกส่วนลดนักเรียนใหม่
+                courseDiscount: data.courseDiscount, 
+                newStudentDiscount: data.newStudentDiscount, 
                 total: data.total,
                 date: data.date,
                 includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
@@ -771,7 +770,7 @@
             receiptDetailsDiv.innerHTML = '';
 
             const addReceiptRow = (label, amount, isDiscount = false) => {
-                if (amount !== 0) {
+                if (amount !== 0) { // Only add row if amount is not zero
                     const row = document.createElement('div');
                     row.className = 'receipt-row';
                     row.innerHTML = `
