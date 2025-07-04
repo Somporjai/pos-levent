@@ -4,7 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>POS โรงเรียนเลอวองจินตคณิต</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">function addPayment() {
+      const s = getSummary();
+      const name = document.getElementById('studentName').value;
+      const phone = document.getElementById('phone').value;
+      const time = new Date().toLocaleString();
+      document.getElementById('receiptText').innerHTML = `
+        <p><strong>ชื่อ:</strong> ${name}</p>
+        <p><strong>เบอร์:</strong> ${phone}</p>
+        <p><strong>คอร์ส:</strong> ${s.label}</p>
+        <p><strong>จำนวนเดือน:</strong> ${s.months}</p>
+        <p><strong>ค่าเรียน:</strong> ${s.tuition.toLocaleString()} บาท</p>
+        <p><strong>ส่วนลด:</strong> ${s.discount.toLocaleString()} บาท</p>
+        <p><strong>ค่าใช้จ่ายอื่น:</strong> ${s.extra.toLocaleString()} บาท</p>
+        <p><strong>ยอดรวมสุทธิ:</strong> ${s.total.toLocaleString()} บาท</p>
+        <p><strong>วันที่:</strong> ${time}</p>
+        <p><em>สำเนาใบเสร็จสำหรับผู้ปกครอง</em></p>
+      `;
+      document.getElementById('receiptContainer').style.display = 'block';
+      const qr = qrcode(0, 'L');
+      qr.addData(`ชื่อ: ${name}
+ยอดรวม: ${s.total} บาท
+วันที่: ${time}`);
+      qr.make();
+      document.getElementById('qr').innerHTML = qr.createImgTag(4);
+
+      fetch(webAppUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          course: s.label,
+          months: s.months,
+          tuition: s.tuition,
+          discount: s.discount,
+          extra: s.extra,
+          total: s.total,
+          timestamp: time
+        })
+      })
+      .then(res => res.text())
+      .then(data => alert("📌 ส่งข้อมูลไปยัง Google Sheet แล้ว"))
+      .catch(err => alert("❌ ไม่สามารถส่งข้อมูลไป Google Sheet ได้"));
+    }
+
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const receipt = document.getElementById('receiptText').innerText;
+      doc.setFont('THSarabunNew', 'normal');
+      doc.setFontSize(16);
+      doc.text("โรงเรียนเลอวองจินตคณิต", 105, 20, { align: 'center' });
+      doc.text(receipt, 20, 40);
+      doc.text(".......................................", 20, 250);
+      doc.text("ลายเซ็นผู้รับเงิน", 20, 258);
+      doc.save("receipt.pdf");
+    }
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
     body {
@@ -47,7 +104,7 @@
     <div id="qr"></div>
   </div>
   <script>
-    const webAppUrl = 'https://script.google.com/macros/s/AKfycbzcpPpfhByzXC_JYiItzBWpZmYV_PbZxJtOU0_m7A7NMM8uffuVucxLCn7xeJ_evoGS/exec';
+    const webAppUrl = 'https://script.google.com/macros/s/your-script-id/exec';
     const courseOptions = [
       { label: "1 เดือน", price: 1200, months: 1 },
       { label: "2 เดือน (ประหยัด 200 บาท)", price: 2200, months: 2 },
@@ -87,82 +144,4 @@
       }
 
       const total = tuition + extra - discount;
-      return { tuition, discount, extra, total, label: selected.label, months: selected.months }; tuition, discount, extra, total, label: selected.label, months: selected.months };
-    }
-
-    function renderSummary() {
-      const s = getSummary();
-      document.getElementById('summary').innerHTML = `
-        📘 ค่าเรียน: ${s.tuition.toLocaleString()} บาท<br>
-        🔖 ส่วนลด: ${s.discount.toLocaleString()} บาท<br>
-        📦 ค่าใช้จ่ายอื่น: ${s.extra.toLocaleString()} บาท<br>
-        <p class='total'>💰 ยอดรวม: ${s.total.toLocaleString()} บาท</p>
-      `;
-    }
-    courseSelect.addEventListener('change', renderSummary);
-    document.getElementById('isNewStudent').addEventListener('change', renderSummary);
-    document.getElementById('includeBook').addEventListener('change', renderSummary);
-    renderSummary();
-
-    function addPayment() {
-      const s = getSummary();
-      const name = document.getElementById('studentName').value;
-      const phone = document.getElementById('phone').value;
-      const time = new Date().toLocaleString();
-      document.getElementById('receiptText').innerHTML = `
-        <p><strong>ชื่อ:</strong> ${name}</p>
-        <p><strong>เบอร์:</strong> ${phone}</p>
-        <p><strong>คอร์ส:</strong> ${s.label}</p>
-        <p><strong>จำนวนเดือน:</strong> ${s.months}</p>
-        <p><strong>ค่าเรียน:</strong> ${s.tuition.toLocaleString()} บาท</p>
-        <p><strong>ส่วนลด:</strong> ${s.discount.toLocaleString()} บาท</p>
-        <p><strong>ค่าใช้จ่ายอื่น:</strong> ${s.extra.toLocaleString()} บาท</p>
-        <p><strong>ยอดรวมสุทธิ:</strong> ${s.total.toLocaleString()} บาท</p>
-        <p><strong>วันที่:</strong> ${time}</p>
-      `;
-      document.getElementById('receiptContainer').style.display = 'block';
-      const qr = qrcode(0, 'L');
-      qr.addData(`ชื่อ: ${name}
-ยอดรวม: ${s.total} บาท
-วันที่: ${time}`);
-      qr.make();
-      document.getElementById('qr').innerHTML = qr.createImgTag(4);
-
-      // ส่งข้อมูลไป Google Sheets
-      fetch(webAppUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          phone,
-          course: s.label,
-          months: s.months,
-          tuition: s.tuition,
-          discount: s.discount,
-          extra: s.extra,
-          total: s.total,
-          timestamp: time
-        })
-      })
-      .then(res => res.text())
-      .then(data => alert("📌 ส่งข้อมูลไปยัง Google Sheet แล้ว"))
-      .catch(err => alert("❌ ไม่สามารถส่งข้อมูลไป Google Sheet ได้"));
-    }
-
-    function exportPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text("ใบเสร็จรับเงิน โรงเรียนเลอวองจินตคณิต", 20, 20);
-      doc.setFontSize(12);
-      let y = 30;
-      const txt = document.getElementById('receiptText').innerText.split('\n');
-      txt.forEach(line => { doc.text(line, 20, y); y += 8; });
-      doc.text("__________________________", 120, y + 10);
-      doc.text("ลงชื่อผู้ปกครอง", 145, y + 18);
-      doc.text("* สำเนาใบเสร็จสำหรับผู้ปกครอง *", 20, y + 30);
-      doc.save("receipt_levong.pdf");
-    }
-  </script>
-</body>
-</html>
+      return { tuition, discount, extra, total, label: selected.label, months: selected.months };
