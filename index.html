@@ -541,9 +541,9 @@
         document.getElementById('includeBook').addEventListener('change', updatePricing);
         document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
         document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
-        document.getElementById('includeEnglish').addEventListener('change', updatePricing);
-        document.getElementById('includeMath1m').addEventListener('change', updatePricing);
-        document.getElementById('includeMath2m').addEventListener('change', updatePricing);
+        document.getElementById('includeEnglish').addEventListener('change', updatePricing); // New listener
+        document.getElementById('includeMath1m').addEventListener('change', updatePricing); // New listener
+        document.getElementById('includeMath2m').addEventListener('change', updatePricing);   // New listener
 
         // Initial call to set up prices on page load
         updatePricing();
@@ -670,7 +670,8 @@
         }
 
         function handleFormSubmit(e) {
-            e.preventDefault();
+            console.log("handleFormSubmit: Function started.");
+            e.preventDefault(); // Prevent default form submission behavior
 
             const studentName = document.getElementById('studentName').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
@@ -684,6 +685,7 @@
 
             if (!studentName || !phoneNumber || (courseTypeSelected === 'none' && !includeBook && !includeEnglish && !includeMath1m && !includeMath2m)) {
                 alert('กรุณากรอกข้อมูลและเลือกอย่างน้อยหนึ่งรายการที่ต้องชำระ');
+                console.log("handleFormSubmit: Validation failed.");
                 return;
             }
 
@@ -782,13 +784,13 @@
                 math2mFee: math2mFullPrice,     // Actual Math 2m price (no discount)
                 abacusFee: abacusCourseActualPrice, // Actual Abacus price
                 tuitionFull: totalFullPrice, // Total full price of all chosen courses
-                tuitionActual: finalTotal, // Final total after all discounts (for sheet consistency)
+                totalActual: finalTotal, // Final total after all discounts (for sheet consistency)
                 bookFee: actualBookFee,
                 membershipFee: actualMembershipFee,
                 bagFee: actualBagFee,
                 courseDiscount: abacusCourseDiscount, // Abacus inherent discount
                 englishComboDiscount: englishComboDiscount, // English combo discount
-                abacusComboDiscount: abacusComboDiscount, // Abacus combo discount
+                abacusComboDiscount: abacusComboDiscount, // Abacus combo discount (for display/tracking in sheet)
                 newStudentDiscount: newStudentPromoDiscount, 
                 total: finalTotal, // Final total to pay
                 date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
@@ -803,9 +805,12 @@
                 selectedAbacusCourseType: courseTypeSelected // Send the ID for Sheets to know exact abacus course
             };
             
+            console.log("handleFormSubmit: paymentData prepared:", paymentData);
             showNotification('กำลังบันทึกข้อมูล...', 'info');
             sendToGoogleSheets(paymentData);
+            console.log("handleFormSubmit: Calling showReceipt()");
             showReceipt();
+            console.log("handleFormSubmit: End of function.");
         }
 
         function sendToGoogleSheets(data) {
@@ -820,13 +825,13 @@
                 studentName: data.studentName,
                 phoneNumber: data.phoneNumber,
                 course: data.courseName, // Combined display string
-                selectedAbacusCourseType: data.selectedAbacusCourseType, // Raw Abacus ID
+                selectedAbacusCourseType: data.selectedAbacusCourseType, // Raw ID of abacus course
                 abacusFee: data.abacusFee, // Actual Abacus fee after its combo discount
                 englishFee: data.englishFee, // Actual English fee after its combo discount
                 math1mFee: data.math1mFee,
                 math2mFee: data.math2mFee,
                 tuitionFull: data.tuitionFull, // Sum of all full prices
-                tuitionActual: data.total, // Final total to pay (sum of actual prices minus all discounts)
+                totalActual: data.total, // Final total to pay (sum of actual prices minus all discounts)
                 bookFee: data.bookFee,
                 membershipFee: data.membershipFee,
                 bagFee: data.bagFee,
@@ -834,7 +839,7 @@
                 englishComboDiscount: data.englishComboDiscount, // English combo discount
                 abacusComboDiscount: data.abacusComboDiscount, // Abacus combo discount (for display/tracking in sheet)
                 newStudentDiscount: data.newStudentDiscount,
-                total: data.total, // Final total to pay (same as tuitionActual here)
+                total: data.total, // Final total to pay (same as totalActual here)
                 date: data.date,
                 includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
                 isNewStudent: data.isNewStudent ? 'ใช่' : 'ไม่ใช่',
@@ -885,12 +890,13 @@
         }
 
         function showReceipt() {
+            console.log("showReceipt: Function started.");
             document.getElementById('formSection').style.display = 'none';
             document.getElementById('receiptSection').style.display = 'block';
 
             document.getElementById('receiptStudentName').textContent = paymentData.studentName;
             document.getElementById('receiptPhoneNumber').textContent = paymentData.phoneNumber;
-            document.getElementById('receiptCourse').textContent = paymentData.courseName; // Combined course string
+            document.getElementById('receiptCourse').textContent = paymentData.courseName; 
             document.getElementById('receiptDate').textContent = paymentData.date;
 
             const receiptDetailsDiv = document.getElementById('receiptDetails');
@@ -921,8 +927,13 @@
             addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
             
             addReceiptRow('ส่วนลด (โปรโมชั่นคอร์สหลัก)', -paymentData.courseDiscount, true); // inherent abacus course discount
-            addReceiptRow('ส่วนลด (ภาษาอังกฤษ + จินตคณิต)', -(paymentData.englishComboDiscount + paymentData.abacusComboDiscount), true); // Combined combo discount display
+            // Display english and abacus combo discount as one line
+            const totalComboDiscountDisplay = paymentData.englishComboDiscount + paymentData.abacusComboDiscount;
+            if (totalComboDiscountDisplay > 0) {
+                addReceiptRow('ส่วนลด (ภาษาอังกฤษ + จินตคณิต)', -totalComboDiscountDisplay, true); 
+            }
             addReceiptRow('ส่วนลด (นักเรียนใหม่)', -paymentData.newStudentDiscount, true);
+
 
             const totalRow = document.createElement('div');
             totalRow.className = 'receipt-row total';
@@ -932,15 +943,11 @@
             `;
             receiptDetailsDiv.appendChild(totalRow);
 
-            const qrCodeDiv = document.getElementById('qrcode');
-            if (qrCodeDiv) { 
-                qrCodeDiv.innerHTML = ''; 
-            }
-            
             const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
             if (googleSheetLinkParagraph) {
                 googleSheetLinkParagraph.style.display = 'block'; 
             }
+            console.log("showReceipt: Function finished.");
         }
 
         function backToForm() {
