@@ -411,9 +411,18 @@
 
 
                 <div class="checkbox-group">
-                    <input type="checkbox" id="includeBook" name="includeBook">
-                    <label for="includeBook">ค่าหนังสือเรียน 180 บาท</label>
+                    <input type="checkbox" id="includeAbacusBook" name="includeAbacusBook">
+                    <label for="includeAbacusBook">ค่าหนังสือจินตคณิต 180 บาท</label>
                 </div>
+                 <div class="checkbox-group">
+                    <input type="checkbox" id="includeEnglishBook" name="includeEnglishBook">
+                    <label for="includeEnglishBook">ค่าหนังสือภาษาอังกฤษ 100 บาท</label>
+                </div>
+                 <div class="checkbox-group">
+                    <input type="checkbox" id="includeMathBook" name="includeMathBook">
+                    <label for="includeMathBook">ค่าหนังสือคณิตศาสตร์ 100 บาท</label>
+                </div>
+
 
                 <div class="checkbox-group">
                     <input type="checkbox" id="isNewStudent" name="isNewStudent">
@@ -430,9 +439,17 @@
                         <span>ค่าเรียน (ราคาเต็ม):</span>
                         <span id="tuitionFullPrice">0 บาท</span>
                     </div>
-                    <div class="price-row" id="bookFeeRow" style="display: none;">
-                        <span>ค่าหนังสือ:</span>
-                        <span id="bookFee">180 บาท</span>
+                    <div class="price-row" id="abacusBookFeeRow" style="display: none;">
+                        <span>ค่าหนังสือจินตคณิต:</span>
+                        <span id="abacusBookFee">180 บาท</span>
+                    </div>
+                     <div class="price-row" id="englishBookFeeRow" style="display: none;">
+                        <span>ค่าหนังสือภาษาอังกฤษ:</span>
+                        <span id="englishBookFee">100 บาท</span>
+                    </div>
+                    <div class="price-row" id="mathBookFeeRow" style="display: none;">
+                        <span>ค่าหนังสือคณิตศาสตร์:</span>
+                        <span id="mathBookFee">100 บาท</span>
                     </div>
                     <div class="price-row" id="membershipFeeRow" style="display: none;">
                         <span>ค่าสมาชิกแรกเข้า:</span>
@@ -532,18 +549,22 @@
         const ENGLISH_COMBO_DISCOUNT_PER_SUBJECT = 100; // ลดภาษาอังกฤษ 100 บาท เมื่อรวมกับจินตคณิต
         const ABACUS_COMBO_DISCOUNT_PER_SUBJECT = 100; // ลดจินตคณิต 100 บาท เมื่อรวมกับภาษาอังกฤษ
 
-        const BOOK_PRICE_VAL = 180;
+        const ABACUS_BOOK_PRICE_VAL = 180; // Renamed
+        const ENGLISH_BOOK_PRICE_VAL = 100; // New
+        const MATH_BOOK_PRICE_VAL = 100; // New
         const MEMBERSHIP_FEE_VAL = 200;
         const BAG_PRICE_VAL = 150;
 
         // Event listeners
         document.getElementById('courseType').addEventListener('change', updatePricing);
-        document.getElementById('includeBook').addEventListener('change', updatePricing);
+        document.getElementById('includeAbacusBook').addEventListener('change', updatePricing); // Renamed ID
+        document.getElementById('includeEnglishBook').addEventListener('change', updatePricing); // New Listener
+        document.getElementById('includeMathBook').addEventListener('change', updatePricing); // New Listener
         document.getElementById('isNewStudent').addEventListener('change', handleNewStudentChange);
         document.getElementById('newStudentPromotion').addEventListener('change', updatePricing);
-        document.getElementById('includeEnglish').addEventListener('change', updatePricing); // New listener
-        document.getElementById('includeMath1m').addEventListener('change', updatePricing); // New listener
-        document.getElementById('includeMath2m').addEventListener('change', updatePricing);   // New listener
+        document.getElementById('includeEnglish').addEventListener('change', updatePricing);
+        document.getElementById('includeMath1m').addEventListener('change', updatePricing);
+        document.getElementById('includeMath2m').addEventListener('change', updatePricing);
 
         // Initial call to set up prices on page load
         updatePricing();
@@ -563,7 +584,9 @@
 
         function updatePricing() {
             const courseTypeSelected = document.getElementById('courseType').value;
-            const includeBook = document.getElementById('includeBook').checked;
+            const includeAbacusBook = document.getElementById('includeAbacusBook').checked; // Renamed
+            const includeEnglishBook = document.getElementById('includeEnglishBook').checked; // New
+            const includeMathBook = document.getElementById('includeMathBook').checked; // New
             const isNewStudent = document.getElementById('isNewStudent').checked;
             const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
             const includeEnglish = document.getElementById('includeEnglish').checked;
@@ -584,7 +607,9 @@
 
             let newStudentPromoDiscount = 0; 
 
-            let actualBookFee = 0;
+            let actualAbacusBookFee = 0; // Renamed
+            let actualEnglishBookFee = 0; // New
+            let actualMathBookFee = 0; // New
             let actualMembershipFee = 0;
             let actualBagFee = 0;
 
@@ -620,9 +645,16 @@
             }
 
             // 4. Calculate initial additional fees (before new student promo)
-            if (includeBook) {
-                actualBookFee = BOOK_PRICE_VAL;
+            if (includeAbacusBook) { // Renamed
+                actualAbacusBookFee = ABACUS_BOOK_PRICE_VAL;
             }
+            if (includeEnglishBook) { // New
+                actualEnglishBookFee = ENGLISH_BOOK_PRICE_VAL;
+            }
+            if (includeMathBook) { // New
+                actualMathBookFee = MATH_BOOK_PRICE_VAL;
+            }
+
             if (isNewStudent) { 
                 actualMembershipFee = MEMBERSHIP_FEE_VAL;
                 actualBagFee = BAG_PRICE_VAL;
@@ -632,9 +664,15 @@
             if (isNewStudent && newStudentPromotion) {
                 if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
                 if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
-                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; 
                 
-                actualBookFee = 0;
+                // Book discounts are based on whether they were included initially
+                if (actualAbacusBookFee > 0 && includeAbacusBook) newStudentPromoDiscount += actualAbacusBookFee;
+                if (actualEnglishBookFee > 0 && includeEnglishBook) newStudentPromoDiscount += actualEnglishBookFee;
+                if (actualMathBookFee > 0 && includeMathBook) newStudentPromoDiscount += actualMathBookFee;
+                
+                actualAbacusBookFee = 0; // Set to 0 if covered by promo
+                actualEnglishBookFee = 0;
+                actualMathBookFee = 0;
                 actualMembershipFee = 0;
                 actualBagFee = 0;
             }
@@ -643,13 +681,19 @@
             const totalFullPrice = abacusCourseFullPrice + englishFullPrice + math1mFullPrice + math2mFullPrice;
 
             // Calculate total actual price
-            const finalTotal = abacusCourseActualPrice + englishActualPrice + math1mFullPrice + math2mFullPrice + actualBookFee + actualMembershipFee + actualBagFee - newStudentPromoDiscount;
+            const finalTotal = abacusCourseActualPrice + englishActualPrice + math1mFullPrice + math2mFullPrice + actualAbacusBookFee + actualEnglishBookFee + actualMathBookFee + actualMembershipFee + actualBagFee - newStudentPromoDiscount;
 
             // --- Update Display ---
             document.getElementById('tuitionFullPrice').textContent = totalFullPrice.toLocaleString() + ' บาท';
 
-            document.getElementById('bookFeeRow').style.display = actualBookFee > 0 ? 'flex' : 'none';
-            document.getElementById('bookFee').textContent = actualBookFee.toLocaleString() + ' บาท';
+            document.getElementById('abacusBookFeeRow').style.display = actualAbacusBookFee > 0 ? 'flex' : 'none'; // Renamed ID
+            document.getElementById('abacusBookFee').textContent = actualAbacusBookFee.toLocaleString() + ' บาท'; // Renamed ID
+
+            document.getElementById('englishBookFeeRow').style.display = actualEnglishBookFee > 0 ? 'flex' : 'none'; // New
+            document.getElementById('englishBookFee').textContent = actualEnglishBookFee.toLocaleString() + ' บาท'; // New
+
+            document.getElementById('mathBookFeeRow').style.display = actualMathBookFee > 0 ? 'flex' : 'none'; // New
+            document.getElementById('mathBookFee').textContent = actualMathBookFee.toLocaleString() + ' บาท'; // New
 
             document.getElementById('membershipFeeRow').style.display = actualMembershipFee > 0 ? 'flex' : 'none';
             document.getElementById('membershipFee').textContent = actualMembershipFee.toLocaleString() + ' บาท';
@@ -676,14 +720,17 @@
             const studentName = document.getElementById('studentName').value;
             const phoneNumber = document.getElementById('phoneNumber').value;
             const courseTypeSelected = document.getElementById('courseType').value;
-            const includeBook = document.getElementById('includeBook').checked;
+            const includeAbacusBook = document.getElementById('includeAbacusBook').checked; // Renamed
+            const includeEnglishBook = document.getElementById('includeEnglishBook').checked; // New
+            const includeMathBook = document.getElementById('includeMathBook').checked; // New
             const isNewStudent = document.getElementById('isNewStudent').checked;
             const newStudentPromotion = document.getElementById('newStudentPromotion').checked;
             const includeEnglish = document.getElementById('includeEnglish').checked;
             const includeMath1m = document.getElementById('includeMath1m').checked;
             const includeMath2m = document.getElementById('includeMath2m').checked;
 
-            if (!studentName || !phoneNumber || (courseTypeSelected === 'none' && !includeBook && !includeEnglish && !includeMath1m && !includeMath2m)) {
+            // Validation: Must select at least one payable item
+            if (!studentName || !phoneNumber || (courseTypeSelected === 'none' && !includeAbacusBook && !includeEnglishBook && !includeMathBook && !includeEnglish && !includeMath1m && !includeMath2m)) {
                 alert('กรุณากรอกข้อมูลและเลือกอย่างน้อยหนึ่งรายการที่ต้องชำระ');
                 console.log("handleFormSubmit: Validation failed.");
                 return;
@@ -704,7 +751,9 @@
 
             let newStudentPromoDiscount = 0; 
 
-            let actualBookFee = 0;
+            let actualAbacusBookFee = 0; 
+            let actualEnglishBookFee = 0;
+            let actualMathBookFee = 0;
             let actualMembershipFee = 0;
             let actualBagFee = 0;
             
@@ -736,8 +785,14 @@
                 abacusCourseActualPrice -= abacusComboDiscount;
             }
 
-            if (includeBook) {
-                actualBookFee = BOOK_PRICE_VAL;
+            if (includeAbacusBook) { 
+                actualAbacusBookFee = ABACUS_BOOK_PRICE_VAL;
+            }
+            if (includeEnglishBook) { 
+                actualEnglishBookFee = ENGLISH_BOOK_PRICE_VAL;
+            }
+            if (includeMathBook) { 
+                actualMathBookFee = MATH_BOOK_PRICE_VAL;
             }
             if (isNewStudent) { 
                 actualMembershipFee = MEMBERSHIP_FEE_VAL;
@@ -747,15 +802,20 @@
             if (isNewStudent && newStudentPromotion) {
                 if (actualMembershipFee > 0) newStudentPromoDiscount += actualMembershipFee;
                 if (actualBagFee > 0) newStudentPromoDiscount += actualBagFee;
-                if (actualBookFee > 0 && includeBook) newStudentPromoDiscount += actualBookFee; 
                 
-                actualBookFee = 0;
+                if (actualAbacusBookFee > 0 && includeAbacusBook) newStudentPromoDiscount += actualAbacusBookFee;
+                if (actualEnglishBookFee > 0 && includeEnglishBook) newStudentPromoDiscount += actualEnglishBookFee;
+                if (actualMathBookFee > 0 && includeMathBook) newStudentPromoDiscount += actualMathBookFee;
+                
+                actualAbacusBookFee = 0; 
+                actualEnglishBookFee = 0;
+                actualMathBookFee = 0;
                 actualMembershipFee = 0;
                 actualBagFee = 0;
             }
             
             const totalFullPrice = abacusCourseFullPrice + englishFullPrice + math1mFullPrice + math2mFullPrice;
-            const finalTotal = abacusCourseActualPrice + englishActualPrice + math1mFullPrice + math2mFullPrice + actualBookFee + actualMembershipFee + actualBagFee - newStudentPromoDiscount;
+            const finalTotal = abacusCourseActualPrice + englishActualPrice + math1mFullPrice + math2mFullPrice + actualAbacusBookFee + actualEnglishBookFee + actualMathBookFee + actualMembershipFee + actualBagFee - newStudentPromoDiscount;
 
 
             // Construct display names for receipt
@@ -779,13 +839,15 @@
                 studentName,
                 phoneNumber,
                 courseName: receiptCourseName, // Display name for receipt
+                abacusFee: abacusCourseActualPrice, // Actual Abacus price
                 englishFee: englishActualPrice, // Actual English price
                 math1mFee: math1mFullPrice,     // Actual Math 1m price (no discount)
                 math2mFee: math2mFullPrice,     // Actual Math 2m price (no discount)
-                abacusFee: abacusCourseActualPrice, // Actual Abacus price
                 tuitionFull: totalFullPrice, // Total full price of all chosen courses
                 totalActual: finalTotal, // Final total after all discounts (for sheet consistency)
-                bookFee: actualBookFee,
+                abacusBookFee: actualAbacusBookFee, // New
+                englishBookFee: actualEnglishBookFee, // New
+                mathBookFee: actualMathBookFee, // New
                 membershipFee: actualMembershipFee,
                 bagFee: actualBagFee,
                 courseDiscount: abacusCourseDiscount, // Abacus inherent discount
@@ -796,7 +858,9 @@
                 date: new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'numeric', day: 'numeric' }),
                 timestamp: new Date().toISOString(), 
                 // Flags for Sheets
-                includeBook: includeBook,
+                includeAbacusBook: includeAbacusBook, // New
+                includeEnglishBook: includeEnglishBook, // New
+                includeMathBook: includeMathBook, // New
                 isNewStudent: isNewStudent,
                 newStudentPromotion: newStudentPromotion,
                 includeEnglish: includeEnglish,
@@ -809,7 +873,7 @@
             showNotification('กำลังบันทึกข้อมูล...', 'info');
             sendToGoogleSheets(paymentData);
             console.log("handleFormSubmit: Calling showReceipt()");
-            showReceipt();
+            showReceipt(); // This is the line that should show the receipt
             console.log("handleFormSubmit: End of function.");
         }
 
@@ -831,8 +895,10 @@
                 math1mFee: data.math1mFee,
                 math2mFee: data.math2mFee,
                 tuitionFull: data.tuitionFull, // Sum of all full prices
-                totalActual: data.total, // Final total to pay (sum of actual prices minus all discounts)
-                bookFee: data.bookFee,
+                totalActual: data.totalActual, // Final total to pay (sum of actual prices minus all discounts)
+                abacusBookFee: data.abacusBookFee, // New field for sheets
+                englishBookFee: data.englishBookFee, // New field for sheets
+                mathBookFee: data.mathBookFee, // New field for sheets
                 membershipFee: data.membershipFee,
                 bagFee: data.bagFee,
                 courseDiscount: data.courseDiscount, // Abacus inherent discount
@@ -841,7 +907,9 @@
                 newStudentDiscount: data.newStudentDiscount,
                 total: data.total, // Final total to pay (same as totalActual here)
                 date: data.date,
-                includeBook: data.includeBook ? 'ใช่' : 'ไม่ใช่',
+                includeAbacusBook: data.includeAbacusBook ? 'ใช่' : 'ไม่ใช่', // New field for sheets
+                includeEnglishBook: data.includeEnglishBook ? 'ใช่' : 'ไม่ใช่', // New field for sheets
+                includeMathBook: data.includeMathBook ? 'ใช่' : 'ไม่ใช่', // New field for sheets
                 isNewStudent: data.isNewStudent ? 'ใช่' : 'ไม่ใช่',
                 newStudentPromotion: data.newStudentPromotion ? 'ใช่' : 'ไม่ใช่',
                 includeEnglish: data.includeEnglish ? 'ใช่' : 'ไม่ใช่',
@@ -890,7 +958,7 @@
         }
 
         function showReceipt() {
-            console.log("showReceipt: Function started.");
+            console.log("showReceipt: Function started."); // Debugging log
             document.getElementById('formSection').style.display = 'none';
             document.getElementById('receiptSection').style.display = 'block';
 
@@ -922,7 +990,9 @@
             if (paymentData.math1mFee > 0) addReceiptRow('ค่าคณิตศาสตร์ 1 เดือน', paymentData.math1mFee);
             if (paymentData.math2mFee > 0) addReceiptRow('ค่าคณิตศาสตร์ 2 เดือน', paymentData.math2mFee);
             
-            addReceiptRow('ค่าหนังสือ', paymentData.bookFee);
+            addReceiptRow('ค่าหนังสือจินตคณิต', paymentData.abacusBookFee); // Updated label and key
+            addReceiptRow('ค่าหนังสือภาษาอังกฤษ', paymentData.englishBookFee); // New
+            addReceiptRow('ค่าหนังสือคณิตศาสตร์', paymentData.mathBookFee); // New
             addReceiptRow('ค่าสมาชิกแรกเข้า', paymentData.membershipFee);
             addReceiptRow('ค่ากระเป๋า', paymentData.bagFee);
             
@@ -947,7 +1017,7 @@
             if (googleSheetLinkParagraph) {
                 googleSheetLinkParagraph.style.display = 'block'; 
             }
-            console.log("showReceipt: Function finished.");
+            console.log("showReceipt: Function finished."); // Debugging log
         }
 
         function backToForm() {
@@ -957,7 +1027,9 @@
             document.getElementById('studentName').value = '';
             document.getElementById('phoneNumber').value = '';
             document.getElementById('courseType').value = 'none'; // Reset to "ไม่เลือกคอร์ส"
-            document.getElementById('includeBook').checked = false;
+            document.getElementById('includeAbacusBook').checked = false; // Renamed
+            document.getElementById('includeEnglishBook').checked = false; // New
+            document.getElementById('includeMathBook').checked = false; // New
             document.getElementById('isNewStudent').checked = false;
             document.getElementById('newStudentPromotion').checked = false;
             document.getElementById('includeEnglish').checked = false; 
