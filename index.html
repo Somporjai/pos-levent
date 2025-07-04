@@ -703,7 +703,7 @@
             originalBtn.style.opacity = '0.7';
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
-            // *** IMPORTANT: This URL is now updated as requested ***
+            // *** IMPORTANT: This URL is now hardcoded as requested ***
             const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA7GW/exec';
 
             const sheetsData = {
@@ -840,25 +840,32 @@
             const originalTop = receiptElement.style.top;
             const originalLeft = receiptElement.style.left;
             const originalOpacity = receiptElement.style.opacity;
+            const originalVisibility = receiptElement.style.visibility; // Added visibility
             const originalPointerEvents = receiptElement.style.pointerEvents;
             const originalZIndex = receiptElement.style.zIndex;
             const originalWidth = receiptElement.style.width;
             const originalMaxWidth = receiptElement.style.maxWidth;
             const originalPadding = receiptElement.style.padding;
 
-            // Make it visible and positioned for capture, but hidden from user interaction
+            // Make it visible (display: block) and structured, but invisible to the user
             receiptElement.style.display = 'block';
-            receiptElement.style.position = 'fixed';
+            receiptElement.style.position = 'absolute'; // Use absolute to take it out of flow but render fully
             receiptElement.style.top = '-9999px'; // Move off-screen
             receiptElement.style.left = '-9999px'; // Move off-screen
-            receiptElement.style.opacity = '0';
-            receiptElement.style.pointerEvents = 'none';
-            receiptElement.style.zIndex = '-1';
+            receiptElement.style.opacity = '0'; // Make it invisible
+            receiptElement.style.visibility = 'hidden'; // Ensure it's hidden from view
+            receiptElement.style.pointerEvents = 'none'; // Disable interactions
+            receiptElement.style.zIndex = '-1'; // Send to background
 
-            // Set fixed width for capture, matching container max-width
-            receiptElement.style.width = '480px';
+            // Set a fixed width that matches the ideal A4 conversion or container's max-width
+            // This ensures html2canvas renders it consistently
+            receiptElement.style.width = '480px'; // Matching max-width of .container
             receiptElement.style.maxWidth = '480px';
-            receiptElement.style.padding = '30px'; // Ensure consistent padding for PDF
+            receiptElement.style.padding = '30px'; // Maintain a standard padding for PDF capture
+
+            // Add a small delay to ensure rendering is complete before capture
+            // This is a common workaround for html2canvas issues
+            await new Promise(resolve => setTimeout(resolve, 50)); // Wait 50ms
 
             const canvas = await html2canvas(receiptElement, {
                 scale: 2, // Higher scale for better quality
@@ -866,21 +873,26 @@
                 logging: false // Disable logging for cleaner console
             });
 
+            // For debugging: open the captured image in a new tab
+            // const imgDebug = canvas.toDataURL('image/png');
+            // window.open(imgDebug);
+
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, millimeters, A4 size
 
-            const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm
-            const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm
-            const imgHeight = canvas.height * imgWidth / canvas.width;
+            const imgWidth = pdf.internal.pageSize.getWidth(); // A4 width in mm (210mm)
+            const pageHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
+            const imgHeight = canvas.height * imgWidth / canvas.width; // Calculate image height to fit PDF width
             let heightLeft = imgHeight;
 
-            let position = 0;
+            let position = 0; // Starting Y position for the image
 
+            // Add image and handle multiple pages if needed
             pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
             heightLeft -= pageHeight;
 
-            while (heightLeft >= 0) {
-                position = heightLeft - pageHeight; // Correct position for next page
+            while (heightLeft > 0) { // Loop while there's still content left to add
+                position = -pageHeight + (imgHeight - heightLeft); // Calculate position for the next page
                 pdf.addPage();
                 pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
                 heightLeft -= pageHeight;
@@ -892,6 +904,7 @@
             receiptElement.style.top = originalTop;
             receiptElement.style.left = originalLeft;
             receiptElement.style.opacity = originalOpacity;
+            receiptElement.style.visibility = originalVisibility; // Restore visibility
             receiptElement.style.pointerEvents = originalPointerEvents;
             receiptElement.style.zIndex = originalZIndex;
             receiptElement.style.width = originalWidth;
