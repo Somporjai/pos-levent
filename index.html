@@ -485,7 +485,8 @@
             <div class="receipt-footer">
                 <p>สำเนาใบเสร็จสำหรับผู้ปกครอง</p>
                 <p>โรงเรียนเลอวองจินตคณิต</p>
-                </div>
+                <p id="googleSheetLinkParagraph" class="hide-on-pdf" style="margin-top: 10px;">📝 ตรวจสอบข้อมูลได้ที่: <a href="https://docs.google.com/spreadsheets/d/15qWPRFfRUpz3DjbqF98wQ0Fcvj-tEQwREvKBLyYknak/edit?gid=0#gid=0" target="_blank" style="color: #4facfe;">ไฟล์สรุปยอดชำระ</a></p>
+            </div>
 
             <button class="btn export-btn" id="exportPdfBtn" onclick="exportToPDF()">ส่งออกเป็น PDF</button>
             <button class="btn back-btn" id="backToFormBtn" onclick="backToForm()">กลับหน้าแรก</button>
@@ -695,7 +696,7 @@
             originalBtn.textContent = 'กำลังบันทึกข้อมูล...';
 
             // *** IMPORTANT: This URL is now hardcoded as requested ***
-            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA7GW/exec';
+            const webAppUrl = 'https://script.google.com/macros/s/AKfycbwPGdtsyS6-YAWSeKK39uOL85qXW3-IphMTPW-lDZk6oUsitii7mTBTW7TMrx2EA9GW/exec';
 
             const sheetsData = {
                 timestamp: data.timestamp, // Use the ISO string from paymentData
@@ -794,7 +795,7 @@
             `;
             receiptDetailsDiv.appendChild(totalRow);
 
-            const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${paymentData.date}`;
+            const qrData = `ชื่อ: ${paymentData.studentName}, ยอดรวม: ${paymentData.total.toLocaleString()} บาท, วันที่: ${new Date().toLocaleDateString('th-TH')}`;
             const qrcodeDiv = document.getElementById('qrcode');
             qrcodeDiv.innerHTML = '';
             new QRCode(qrcodeDiv, {
@@ -805,6 +806,12 @@
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
+            
+            // Show the Google Sheet link after the receipt is rendered
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
+            if (googleSheetLinkParagraph) {
+                googleSheetLinkParagraph.style.display = 'block'; // Make sure it's block-level
+            }
         }
 
         function backToForm() {
@@ -819,6 +826,12 @@
             document.getElementById('newStudentPromotion').checked = false;
             handleNewStudentChange();
             updatePricing();
+            
+            // Optionally hide the Google Sheet link when going back to the form
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
+            if (googleSheetLinkParagraph) {
+                googleSheetLinkParagraph.style.display = 'none';
+            }
         }
 
         async function exportToPDF() {
@@ -826,8 +839,7 @@
             const receiptElement = document.getElementById('receiptSection');
             const exportPdfBtn = document.getElementById('exportPdfBtn');
             const backToFormBtn = document.getElementById('backToFormBtn');
-            // Select the newly added Google Sheet link paragraph
-            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph');
+            const googleSheetLinkParagraph = document.getElementById('googleSheetLinkParagraph'); // Get the link element
 
 
             // Store original body styles
@@ -903,10 +915,9 @@
                 const pdfHeight = pdf.internal.pageSize.getHeight(); // A4 height in mm (297mm)
                 const imgHeightScaled = canvas.height * pdfWidth / canvas.width; // Calculate image height to fit PDF width
 
-                // Add image to PDF. No need for multi-page logic if content fits one page.
+                // Add image to PDF. Only add one page as requested.
                 // If content is too long for one page, it will be cut off.
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeightScaled);
-                // Removed the while loop and multi-page logic, as requested for single page.
 
                 pdf.save(`ใบเสร็จ_${paymentData.studentName}_${paymentData.date}.pdf`);
 
@@ -922,6 +933,8 @@
                 backToFormBtn.classList.remove('hide-on-pdf');
                 if (googleSheetLinkParagraph) {
                     googleSheetLinkParagraph.classList.remove('hide-on-pdf');
+                    // Ensure it's explicitly shown on the receipt page after PDF export
+                    googleSheetLinkParagraph.style.display = 'block'; 
                 }
 
                 document.body.style.overflow = originalBodyOverflow;
